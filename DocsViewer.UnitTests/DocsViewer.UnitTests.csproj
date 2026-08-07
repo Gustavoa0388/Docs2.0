@@ -22,4 +22,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocsViewer.Domain\DocsViewer.Domain.csproj" />
+    <ProjectReference Include="..\DocsViewer.Application\DocsViewer.Application.csproj" />
+  </ItemGroup>
+
 </Project>

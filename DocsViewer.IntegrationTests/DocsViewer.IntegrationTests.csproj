@@ -22,4 +22,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocsViewer.Application\DocsViewer.Application.csproj" />
+    <ProjectReference Include="..\DocsViewer.Infrastructure\DocsViewer.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

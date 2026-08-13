@@ -55,4 +55,26 @@
 **Recomendação (não implementada — aguardando decisão humana):** Migrar para .NET 10 LTS antes de aprofundar a fundação técnica. Justificativa: o .NET 8 encerra suporte em ~3 meses (11/2026), antes mesmo de o projeto provavelmente sair da fase de fundação; permanecer nele significa iniciar um projeto novo já com prazo curto até ficar sem patches de segurança. O .NET 10 já é LTS estável (GA há ~9 meses) e o custo de troca é mínimo agora, tendendo a aumentar a cada tarefa futura que adicionar código.
 
 **Opções identificadas (sem escolher pela IA — decisão humana):** (1) Migrar para .NET 10 LTS agora; (2) Permanecer em .NET 8 LTS e planejar migração antes de 11/2026; (3) Permanecer em .NET 8 LTS e reavaliar em tarefa futura específica.
-**Status:** Aberta — decisão humana pendente. Nenhuma alteração de `TargetFramework` foi feita.
+**Status:** Aberta — decisão humana pendente. Nenhuma alteração de `TargetFramework` foi feita (reconfirmado na DV2-DEV-002: segue net8.0 em todos os projetos).
+
+---
+
+### Q-004
+**Data:** 2026-08-10
+**Tarefa:** DV2-DEV-002
+**Requisito:** Item 3 da tarefa DV2-DEV-002 ("Documentação oficial")
+**Pergunta:** A tarefa DV2-DEV-002 lista como documentação oficial a ser lida antes da implementação: `DV2-000 — Product Vision`, `DV2-001 — Documento de Fundação`, `DV2-PMP-001 — Plano Mestre do Projeto` e `DV2-BRN-001 — Regras de Negócio`. Nenhum desses quatro documentos existe no repositório — nem em `main`, nem em nenhuma branch (verificado via listagem de árvore em `main`, `docs/ADR-002-web-core-shell-clients` e `docs/DV2-URS-001-v0.1`). Esses documentos ainda não foram criados/versionados, ou existem em outro local fora deste repositório?
+**Impacto:** Nesta tarefa (DV2-DEV-002) o impacto foi nulo, pois o escopo é puramente shell/layout visual, sem regra de negócio. Passa a ser bloqueante para qualquer tarefa futura que dependa de Product Vision, Documento de Fundação, Plano Mestre ou Regras de Negócio formalizados (ex.: modelagem de Documento/Revisão, permissões, Audit Trail).
+**Opções identificadas (sem escolher):** os documentos ainda não foram redigidos e precisam ser criados/versionados; existem em ferramenta externa (Google Drive, Word, etc.) e ainda não foram trazidos ao repositório; ou a lista da tarefa antecipou nomes de documentos previstos no Plano Mestre que ainda serão elaborados.
+**Status:** Aberta
+
+---
+
+### Q-005
+**Data:** 2026-08-10
+**Tarefa:** DV2-DEV-002
+**Requisito:** Item 4 da tarefa DV2-DEV-002 ("Branch") — "garantir que nenhuma alteração documental pendente seja perdida"
+**Pergunta:** Existem 3 Pull Requests abertos como draft, nenhum mergeado em `main`: PR #1 (`claude/DV2-DEV-001-fundacao-tecnica` — fundação técnica/código), PR #2 (`docs/DV2-URS-001-v0.1` — URS v0.1 Draft) e PR #3 (`docs/ADR-002-web-core-shell-clients` — ADR-002, núcleo Web + clientes-shell). Como `main` ainda não contém nem o código da DV2-DEV-001 nem esses documentos, a branch `feature/DV2-DEV-002-blazor-foundation` desta tarefa foi criada a partir de `claude/DV2-DEV-001-fundacao-tecnica` (única base com a solução .NET presente), e não de `main`. Qual a ordem correta de integração desses PRs (#1, #2, #3 e agora o desta tarefa) em `main`?
+**Impacto:** Enquanto os PRs não forem revisados/mergeados, cada nova tarefa de código precisa continuar partindo de `claude/DV2-DEV-001-fundacao-tecnica` (ou de uma branch equivalente) em vez de `main`, e a árvore de branches tende a divergir mais. Não é um impedimento técnico para o trabalho em si, mas é uma decisão de governança do repositório.
+**Opções identificadas (sem escolher):** revisar e mergear PR #1 antes de iniciar novas tarefas de código; manter o encadeamento atual (branches de código a partir de `claude/DV2-DEV-001-fundacao-tecnica`) até uma revisão consolidada; mergear os PRs documentais (#2, #3) independentemente do código, já que não conflitam com ele.
+**Status:** Aberta

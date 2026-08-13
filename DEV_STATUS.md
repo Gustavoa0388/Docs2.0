@@ -1,102 +1,121 @@
 # DEV_STATUS.md
 
 ## Estado geral
-DV2-DEV-001 fechada formalmente.
+DV2-DEV-002 concluída — fundação executável Blazor entregue.
 
 ## Branch atual
-claude/DV2-DEV-001-fundacao-tecnica
+feature/DV2-DEV-002-blazor-foundation (criada a partir de
+claude/DV2-DEV-001-fundacao-tecnica — ver observação de base em "Riscos").
 
 ## Tarefa atual
-DV2-DEV-001 — Criar a fundação técnica da solução (fechamento formal:
-decisões humanas para Q-001 e Q-002 aplicadas; Q-003 registrada).
+DV2-DEV-002 — Fundação Executável do DocsViewer Omni (converter
+DocsViewer.Web em Blazor Web App com Interactive Server, layout base,
+dashboard mínimo, identidade visual sóbria).
 
-## Requisitos relacionados
-- CLAUDE.md — Arquitetura inicial (monólito modular, projetos)
-- CLAUDE.md — Tecnologias provisoriamente aprovadas (Blazor Web App)
-- README_CLAUDE_CODE_SETUP.md — Primeira tarefa recomendada
-
-## Regras relacionadas
+## Requisitos/decisões relacionados
+- CLAUDE.md — Arquitetura inicial; Tecnologias provisoriamente aprovadas
 - docs/ARCHITECTURE.md — Dependências entre projetos
+- docs/decisions/ADR-001-blazor-web-app-interactive-server.md — Interactive Server (aprovado na DV2-DEV-001)
+- docs/decisions/ADR-002-web-core-com-clientes-shell-opcionais.md — núcleo Web centralizado (lido a partir da branch docs/ADR-002-web-core-shell-clients, ainda não mergeada em main; ver "Riscos")
 
-## Alterações realizadas
-**Parte 1 (scaffolding):** Criada a solution `DocsViewer.sln` com os 6
-projetos previstos no CLAUDE.md (Domain, Application, Infrastructure, Web,
-UnitTests, IntegrationTests), todos vazios (sem entidades, sem
-controllers, sem páginas, sem autenticação/autorização, sem banco).
-Adicionadas as referências entre projetos principais definidas em
-docs/ARCHITECTURE.md. Removido o endpoint de exemplo do template padrão
-do projeto Web e os `Class1.cs` de exemplo dos class libraries. Adicionado
-`.gitignore` padrão do .NET.
+## Arquitetura aplicada
+DocsViewer.Web convertido em Blazor Web App (Interactive Server), sem
+criar projeto paralelo. Estrutura adicionada:
+- `Program.cs` — registra `AddRazorComponents().AddInteractiveServerComponents()` e mapeia `AddInteractiveServerRenderMode()`.
+- `Components/App.razor`, `_Imports.razor`, `Routes.razor`, `Pages/Error.razor` — padrão do template Blazor Web App (.NET 8, gerado localmente com `dotnet new blazor --interactivity Server --empty` apenas como referência, depois integrado manualmente ao projeto existente).
+- `Components/Layout/MainLayout.razor(.css)` — cabeçalho ("DocsViewer Omni" + "Versão em desenvolvimento" + placeholder de usuário) e composição do corpo (menu lateral + conteúdo).
+- `Components/Layout/NavMenu.razor(.css)` — menu lateral (Início, Documentos, Favoritos, Solicitações, Administração).
+- `Components/Pages/Home.razor` — dashboard com os 4 cards pedidos.
+- `Components/Pages/NotImplemented.razor` — página compartilhada "Funcionalidade ainda não implementada", roteada em `/documentos`, `/favoritos`, `/solicitacoes`, `/administracao`.
+- `wwwroot/app.css` — identidade visual (azul corporativo, fundo claro, sem framework CSS externo), com um breakpoint responsivo (~768px).
+- `wwwroot/favicon.svg` — ícone simples com a marca "DV" (mesma identidade do cabeçalho).
 
-**Parte 2 (fechamento formal):**
-- Criado `docs/decisions/ADR-001-blazor-web-app-interactive-server.md`,
-  registrando a decisão aprovada pelo responsável do projeto: Blazor Web
-  App com **Interactive Server** como modelo de renderização da primeira
-  versão (WebAssembly e Auto descartados nesta fase). Nenhuma alteração
-  de código foi feita em DocsViewer.Web — o ADR registra a decisão para
-  quando a tarefa de UI/Viewer for aberta.
-- Q-001 e Q-002 marcadas como Resolvidas em
-  docs/handoff/OPEN_QUESTIONS.md, com a decisão registrada em cada uma.
-- Adicionadas as referências de teste decididas pelo responsável do
-  projeto: `DocsViewer.UnitTests` → `DocsViewer.Domain` e
-  `DocsViewer.Application`; `DocsViewer.IntegrationTests` →
-  `DocsViewer.Application` e `DocsViewer.Infrastructure` (referência a
-  `DocsViewer.Web` fica para quando um teste real precisar do host Web).
-- Removidos os `UnitTest1.cs` de exemplo de ambos os projetos de teste,
-  que permanecem vazios (mantido apenas `GlobalUsings.cs`).
-- Registrada Q-003 em docs/handoff/OPEN_QUESTIONS.md: análise objetiva
-  .NET 8 LTS vs .NET 10 LTS (datas de fim de suporte, maturidade, custo de
-  migração) com recomendação de migrar para .NET 10 LTS, para decisão
-  humana. **Nenhuma alteração de TargetFramework foi feita** — segue
-  net8.0 em todos os projetos.
+DocsViewer.Domain, Application e Infrastructure não foram alterados —
+nenhuma dependência nova foi introduzida em nenhum projeto (sem MediatR,
+CQRS, AutoMapper, Redis, Docker, message bus).
 
-## Arquivos alterados
-- docs/decisions/ADR-001-blazor-web-app-interactive-server.md (novo)
-- docs/handoff/OPEN_QUESTIONS.md (Q-001 e Q-002 resolvidas; Q-003 criada)
-- DocsViewer.UnitTests/DocsViewer.UnitTests.csproj (referências a Domain e Application adicionadas)
-- DocsViewer.IntegrationTests/DocsViewer.IntegrationTests.csproj (referências a Application e Infrastructure adicionadas)
-- DocsViewer.UnitTests/UnitTest1.cs (removido)
-- DocsViewer.IntegrationTests/UnitTest1.cs (removido)
-- DEV_STATUS.md (este arquivo)
+## Migrations
+Nenhuma.
 
-## Banco / migrations
-Nenhuma — fora do escopo desta tarefa.
+## Banco
+Não implementado — fora do escopo desta tarefa.
 
-## Testes criados
-Nenhum teste real — fora do escopo. Os projetos DocsViewer.UnitTests e
-DocsViewer.IntegrationTests permanecem vazios (sem nenhum arquivo de
-teste), apenas com as referências de projeto corretas já configuradas.
+## Testes
+Nenhum teste novo criado (não havia comportamento de negócio a testar).
+Nenhum teste de template residual encontrado (UnitTest1.cs já havia sido
+removido no fechamento da DV2-DEV-001). Confirmado que
+DocsViewer.UnitTests e DocsViewer.IntegrationTests continuam compilando
+normalmente dentro da solution.
 
-## Resultado dos testes
+## Resultado de restore
+`dotnet restore` — "All projects are up-to-date for restore." Sem erros.
+
+## Resultado de build
 `dotnet build DocsViewer.sln` — Build succeeded, 0 Warning(s), 0 Error(s).
-Critério de aceite da tarefa atendido após as alterações de fechamento.
 
-## Decisões/assumptions
-- **Q-001 (resolvida):** Blazor Web App com Interactive Server — decisão
-  do responsável do projeto, registrada em ADR-001. Implementação do
-  scaffolding Blazor fica para tarefa futura de UI/Viewer.
-- **Q-002 (resolvida):** referências de teste definidas pelo responsável
-  do projeto (ver acima).
-- **Q-003 (aberta):** recomendação registrada de migrar para .NET 10 LTS
-  (fundamentada em datas de fim de suporte: .NET 8 termina em 10/11/2026,
-  .NET 10 é suportado até 11/2028), mas decisão e execução dependem de
-  aprovação humana explícita. TargetFramework não foi alterado.
-- Framework de teste adotado: xUnit (assumption já registrada na criação
-  da tarefa, sem impacto arquitetural).
+## Resultado da execução
+`dotnet run --project DocsViewer.Web` (perfil http, ASPNETCORE_ENVIRONMENT=Development):
+- aplicação iniciou sem exceções (log revisado, sem stack trace/erro);
+- `GET /` → 200, HTML renderizado no servidor com o layout completo;
+- `GET /documentos`, `/favoritos`, `/solicitacoes`, `/administracao` → 200 (página "Funcionalidade ainda não implementada");
+- `GET /app.css`, `/DocsViewer.Web.styles.css`, `/_framework/blazor.web.js` → 200 (arquivos estáticos e script do circuito Interactive Server carregam);
+- validado também via navegador real (Chromium headless/Playwright): título da página, cabeçalho, item de menu ativo, navegação client-side (clique em "Documentos" troca de página sem reload completo, confirmando o circuito SignalR do Interactive Server funcional), captura de tela em largura desktop (1280px) e tablet (820px), sem erros de console/rede (após adicionar favicon.svg, que eliminou o único 404 encontrado na primeira validação).
+
+## Decisões tomadas
+- Base da branch: `feature/DV2-DEV-002-blazor-foundation` criada a partir
+  de `claude/DV2-DEV-001-fundacao-tecnica` (não de `main`), pois `main`
+  ainda não contém a solução .NET da DV2-DEV-001 (PR #1 aberto, não
+  mergeado). Ver Q-005 em OPEN_QUESTIONS.md.
+- Conversão do projeto Web feita manualmente, copiando/adaptando a
+  estrutura gerada por `dotnet new blazor --interactivity Server --empty`
+  em diretório temporário fora do repositório (apenas como referência de
+  boilerplate correto), em vez de rodar o template diretamente sobre
+  DocsViewer.Web — para não arriscar sobrescrever o `.csproj`/referência
+  já existente.
+- Identidade visual construída com CSS próprio (sem Bootstrap ou outro
+  framework CSS), variáveis de cor centralizadas (`:root`), para manter a
+  solução simples e sem dependências novas.
+- Itens de menu não implementados apontam para uma única página
+  compartilhada "Funcionalidade ainda não implementada" (em vez de
+  desabilitados), para comprovar navegação real funcionando.
+- Favicon simples (SVG com a marca "DV") adicionado após validação no
+  navegador revelar 404 em `/favicon.ico` — ajuste de scaffolding, não
+  decisão de identidade visual definitiva.
+
+## Assumptions
+- Nenhuma nova assumption técnica além das já registradas na DV2-DEV-001
+  (xUnit como framework de teste; net8.0 como TargetFramework, mantido
+  sem alteração nesta tarefa).
 
 ## Riscos
-Nenhum risco técnico novo nesta etapa. Risco já conhecido: .NET 8 LTS
-(versão atual do projeto) encerra suporte em 10/11/2026 — ver Q-003.
+- **Base de branch:** `main` ainda não contém nem o código da DV2-DEV-001
+  nem os documentos das PRs #2/#3 (URS v0.1, ADR-002). Enquanto esses PRs
+  não forem revisados/mergeados, novas tarefas de código continuarão
+  precisando partir de `claude/DV2-DEV-001-fundacao-tecnica` (ou desta
+  branch) em vez de `main`. Não bloqueou esta tarefa, mas é uma pendência
+  de governança do repositório — ver Q-005.
+- **Documentos oficiais ausentes:** DV2-000, DV2-001, DV2-PMP-001 e
+  DV2-BRN-001, citados na tarefa, não existem em nenhuma branch do
+  repositório — ver Q-004. Sem impacto nesta tarefa (escopo puramente
+  visual), mas bloqueante para tarefas futuras de domínio/negócio.
+- Risco já conhecido: .NET 8 LTS encerra suporte em 10/11/2026 — ver Q-003
+  (ainda aberta, sem decisão).
 
 ## Pendências
-- Q-003: decisão humana sobre migrar (ou não) para .NET 10 LTS antes de
-  a fundação técnica avançar mais.
-- Implementação do scaffolding Blazor Web App (Interactive Server) em
-  DocsViewer.Web, quando houver tarefa formal de UI/Viewer.
+- Q-003: decisão humana sobre migrar (ou não) para .NET 10 LTS.
+- Q-004: origem/existência de DV2-000, DV2-001, DV2-PMP-001, DV2-BRN-001.
+- Q-005: ordem de integração dos PRs #1, #2, #3 e desta tarefa em `main`.
 - Referência de DocsViewer.IntegrationTests para DocsViewer.Web, quando
-  houver teste real que precise subir o host Web.
+  houver teste real que precise subir o host Web (Q-002, já decidida
+  quanto ao critério, ainda não aplicável).
+- Implementação real dos clientes-shell Windows/Android (ADR-002) —
+  explicitamente fora do escopo desta tarefa.
 
-## Próximo passo
-Aguardar decisão humana sobre Q-003 e a próxima tarefa formal (ex.:
-fundação de banco/EF Core ou primeiras entidades de Domain, conforme
-ROADMAP.md — Fase 1).
+## Próximo passo sugerido
+Revisar e decidir sobre a integração dos PRs pendentes (#1, #2, #3) em
+`main` antes de abrir novas tarefas de código, para que a base deixe de
+divergir. Em paralelo, decisão humana sobre Q-003 (.NET 8 vs .NET 10) e
+esclarecimento de Q-004 (documentos ausentes). Tecnicamente, a próxima
+tarefa de produto seria a primeira funcionalidade real de domínio
+(Documento/Revisão) ou banco/EF Core, conforme ROADMAP.md — Fase 1/2,
+porém isso depende das definições acima.

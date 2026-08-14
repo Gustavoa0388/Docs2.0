@@ -1,61 +1,70 @@
 # DEV_STATUS.md
 
 ## Estado geral
-DV2-SPRINT-001 em andamento. Etapa 1 (merge da DV2-DEV-002) e Etapa 2
-(ADR-003 — migração para .NET 10 LTS) concluídas.
+DV2-SPRINT-001 em andamento. Etapas 1 (merge DV2-DEV-002), 2 (ADR-003 —
+.NET 10 LTS), 3 (estrutura documental) e 4 (rastreabilidade) concluídas.
 
 ## Branch atual
-feature/DV2-ADR-003-dotnet10-lts (a partir de `main`, já com DV2-DEV-002
-integrada).
+feature/DV2-SPRINT-001-etapa3-estrutura-documental (a partir de `main`,
+já com DV2-DEV-002 e ADR-003/.NET 10 integradas).
 
 ## Tarefa atual
-DV2-SPRINT-001 — Etapa 2: DV2-ADR-003 — adoção do .NET 10 LTS.
+DV2-SPRINT-001 — Etapas 3 e 4: consolidação da estrutura documental e
+preparação da rastreabilidade.
 
 ## Requisitos/decisões relacionados
-- CLAUDE.md — Tecnologias provisoriamente aprovadas ("não trocar
-  tecnologia sem ADR aprovado")
-- docs/decisions/ADR-003-dotnet-10-lts.md (novo)
-- docs/handoff/OPEN_QUESTIONS.md — Q-003 (encerrada por esta etapa)
+- docs/handoff/OPEN_QUESTIONS.md — Q-004 (documentos oficiais v0.2 ainda
+  ausentes; permanece aberta)
+- docs/decisions/ADR-002-web-core-com-clientes-shell-opcionais.md —
+  cita DV2-SDS-001, DV2-000, DV2-001, DV2-URS-001 como impacto documental
 
 ## O que foi feito
 
-### Etapa 1 — Merge da DV2-DEV-002
-PR #4 revisado (diff restrito à DEV-002, build 0 erros/0 warnings,
-execução validada via HTTP) e mergeado em `main` (merge commit
-`ce68914`). `main` atualizada localmente; `dotnet restore` + `dotnet
-build DocsViewer.sln` + execução revalidados diretamente em `main`, sem
-erros.
+### Etapa 3 — Estrutura documental
+1. Criadas as pastas `docs/00-product`, `01-project`, `02-validation`,
+   `03-requirements`, `04-business-rules`, `05-risk`, `06-design`,
+   `07-tests`, `08-traceability`, cada uma com `README.md` explicando o
+   documento oficial esperado, sua versão vigente e status (todas
+   ausentes nesta data).
+2. Criado `docs/README.md` como índice geral da documentação, mapeando a
+   estrutura completa e listando explicitamente os 5 documentos oficiais
+   ainda pendentes (DV2-000 v0.2, DV2-001 v0.4.2, DV2-PMP-001 vigente,
+   DV2-URS-001 v0.2, DV2-BRN-001 v0.2 corrigido).
+3. **Nenhum arquivo existente foi movido.** `docs/PROJECT_CONTEXT.md`,
+   `ARCHITECTURE.md`, `DEVELOPMENT_RULES.md`,
+   `VALIDATION_AWARE_DEVELOPMENT.md`, `PERMISSION_MODEL.md` e
+   `ROADMAP.md` permanecem na raiz de `docs/`, pois `CLAUDE.md` e
+   `CLAUDE_MASTER_PROMPT.md` referenciam esses caminhos diretamente e
+   `CLAUDE.md` não está entre os arquivos que esta tarefa pode alterar.
+   `docs/decisions/` e `docs/handoff/` já tinham a organização correta e
+   não foram tocadas.
+4. Nenhum DOCX foi recriado de memória; nenhum documento oficial foi
+   inventado.
 
-### Etapa 2 — ADR-003 e migração para .NET 10 LTS
-1. Instalado .NET SDK 10.0.110 no ambiente (adicional ao 8.0.129 já
-   existente, sem removê-lo).
-2. Criado `docs/decisions/ADR-003-dotnet-10-lts.md`, registrando a
-   decisão do responsável do projeto: adotar .NET 10 LTS como
-   framework-base, com contexto, justificativa, alternativas
-   consideradas, consequências, riscos, impacto sobre desenvolvimento e
-   validação. Status: Aprovado (Accepted).
-3. `TargetFramework` alterado de `net8.0` para `net10.0` nos 6 projetos
-   da solution (`DocsViewer.Domain`, `Application`, `Infrastructure`,
-   `Web`, `UnitTests`, `IntegrationTests`). Nenhuma outra alteração de
-   dependências/bibliotecas.
-4. `dotnet restore` e `dotnet build DocsViewer.sln` — sem erros e **sem
-   warnings** decorrentes da migração (nada a corrigir).
-5. Aplicação executada em .NET 10 (`dotnet run --project DocsViewer.Web`)
-   — todas as rotas retornaram 200, sem exceções no log.
-6. Interactive Server revalidado via navegador headless (Chromium/
-   Playwright): navegação client-side funcional, sem erros de console.
-7. Q-003 encerrada em `docs/handoff/OPEN_QUESTIONS.md`, referenciando
-   ADR-003.
+### Etapa 4 — Rastreabilidade
+1. Criado `docs/08-traceability/README.md`, explicando o propósito da
+   matriz e o que já pode/não pode ser rastreado hoje.
+2. Criado `docs/08-traceability/TRACEABILITY_MATRIX.md`, com a estrutura
+   de colunas (Requisito URS / Regra BRN / ADR / Componente / Arquivos /
+   Teste / Status) sem nenhuma linha de requisito ou regra — porque URS
+   v0.2 e BRN v0.2 ainda não estão no repositório. A única seção
+   preenchida lista as 3 ADRs já aprovadas (ADR-001, ADR-002, ADR-003),
+   que têm IDs reais.
+3. Nenhum ID de requisito/regra foi inventado ou herdado da URS v0.1
+   superada.
 
-## Arquivos alterados/criados nesta etapa
-- docs/decisions/ADR-003-dotnet-10-lts.md (novo)
-- DocsViewer.Domain/DocsViewer.Domain.csproj (TargetFramework net10.0)
-- DocsViewer.Application/DocsViewer.Application.csproj (TargetFramework net10.0)
-- DocsViewer.Infrastructure/DocsViewer.Infrastructure.csproj (TargetFramework net10.0)
-- DocsViewer.Web/DocsViewer.Web.csproj (TargetFramework net10.0)
-- DocsViewer.UnitTests/DocsViewer.UnitTests.csproj (TargetFramework net10.0)
-- DocsViewer.IntegrationTests/DocsViewer.IntegrationTests.csproj (TargetFramework net10.0)
-- docs/handoff/OPEN_QUESTIONS.md (Q-003 resolvida)
+## Arquivos criados nesta etapa
+- docs/README.md
+- docs/00-product/README.md
+- docs/01-project/README.md
+- docs/02-validation/README.md
+- docs/03-requirements/README.md
+- docs/04-business-rules/README.md
+- docs/05-risk/README.md
+- docs/06-design/README.md
+- docs/07-tests/README.md
+- docs/08-traceability/README.md
+- docs/08-traceability/TRACEABILITY_MATRIX.md
 - DEV_STATUS.md (este arquivo)
 
 ## Migrations
@@ -65,52 +74,40 @@ Nenhuma.
 Não implementado.
 
 ## Testes
-Nenhum teste novo. Build da solution completo (incluindo
-DocsViewer.UnitTests e DocsViewer.IntegrationTests) sem erros após a
-migração.
+Nenhum (tarefa puramente documental).
 
-## Resultado de restore
-`dotnet restore DocsViewer.sln` — sem erros (net10.0).
-
-## Resultado de build
-`dotnet build DocsViewer.sln` — Build succeeded, **0 Warning(s), 0
-Error(s)** (net10.0).
-
-## Resultado da execução
-`dotnet run --project DocsViewer.Web` (net10.0) — aplicação iniciou sem
-exceções; todas as rotas (`/`, `/documentos`, `/favoritos`,
-`/solicitacoes`, `/administracao`, `/app.css`, `/favicon.svg`,
-`/_framework/blazor.web.js`) retornaram 200; Interactive Server
-confirmado funcional via navegador headless.
+## Resultado de restore / build / execução
+Não aplicável a esta etapa (nenhuma alteração de código). O último
+resultado válido de build/execução (Etapa 2, .NET 10) segue vigente:
+`dotnet build DocsViewer.sln` — Build succeeded, 0 Warning(s), 0
+Error(s).
 
 ## Decisões tomadas
-- Migração para .NET 10 LTS decidida pelo responsável do projeto (item 2
-  da tarefa DV2-SPRINT-001), registrada em ADR-003 e aplicada
-  integralmente — nenhuma decisão adicional foi inventada.
-- SDK .NET 10 instalado ao lado do .NET 8 no ambiente de
-  desenvolvimento, sem remover o 8.0 (mantém compatibilidade com
-  ferramentas que ainda o exijam).
+- Não mover documentos de metodologia existentes (`PROJECT_CONTEXT.md`
+  etc.) para dentro da nova estrutura numerada, para não quebrar
+  referências de `CLAUDE.md`/`CLAUDE_MASTER_PROMPT.md` — registrado
+  explicitamente em `docs/README.md`.
+- Matriz de rastreabilidade criada apenas com estrutura de colunas,
+  vazia de requisitos/regras, até que URS v0.2 e BRN v0.2 cheguem ao
+  repositório.
 
 ## Assumptions
-Nenhuma nova assumption técnica além da decisão explícita fornecida.
+Nenhuma nova assumption técnica.
 
 ## Riscos
-- .NET 10 é uma versão mais nova; pacotes de terceiros específicos podem
-  ter cobertura/maturidade menor do que para .NET 8 — nenhuma dependência
-  crítica de terceiros identificada até o momento na solution.
-- Ambientes de CI/produção precisarão ter o SDK/runtime .NET 10
-  disponível quando essas tarefas forem abertas — não avaliado nesta
-  etapa.
-- Riscos herdados (Q-004: documentos oficiais v0.2 ainda ausentes do
-  repositório) seguem válidos.
+- Nenhum risco técnico novo. Risco documental já conhecido (Q-004)
+  segue registrado e sem mudança de status.
 
 ## Pendências
-- Q-003: **resolvida** nesta etapa (ver ADR-003).
-- Q-004: aguardando documentos oficiais v0.2 no repositório.
-- Próximas etapas do DV2-SPRINT-001: consolidação documental,
-  rastreabilidade, fundação de persistência (DV2-DEV-003), testes e
-  proposta DV2-DEV-004.
+- Q-004: aguardando os documentos oficiais v0.2 (Product Vision,
+  Documento de Fundação, PMP-001, URS, BRN) serem adicionados ao
+  repositório, em tarefa documental dedicada — isso desbloqueará o
+  preenchimento real de `docs/08-traceability/TRACEABILITY_MATRIX.md`.
 
 ## Próximo passo sugerido
-Prosseguir com a Etapa 3 do DV2-SPRINT-001 (estrutura documental) e
-demais etapas planejadas, conforme instrução do sprint.
+Prosseguir com a Etapa 5 do DV2-SPRINT-001 (DV2-DEV-003 — fundação de
+persistência com EF Core), já que suas pré-condições (DV2-DEV-002
+integrada, migração para .NET 10 concluída, build limpo) estão
+satisfeitas. Q-004 segue como pendência paralela, a ser resolvida por
+tarefa documental separada quando os arquivos oficiais estiverem
+disponíveis.

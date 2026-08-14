@@ -55,7 +55,8 @@
 **Recomendação (não implementada — aguardando decisão humana):** Migrar para .NET 10 LTS antes de aprofundar a fundação técnica. Justificativa: o .NET 8 encerra suporte em ~3 meses (11/2026), antes mesmo de o projeto provavelmente sair da fase de fundação; permanecer nele significa iniciar um projeto novo já com prazo curto até ficar sem patches de segurança. O .NET 10 já é LTS estável (GA há ~9 meses) e o custo de troca é mínimo agora, tendendo a aumentar a cada tarefa futura que adicionar código.
 
 **Opções identificadas (sem escolher pela IA — decisão humana):** (1) Migrar para .NET 10 LTS agora; (2) Permanecer em .NET 8 LTS e planejar migração antes de 11/2026; (3) Permanecer em .NET 8 LTS e reavaliar em tarefa futura específica.
-**Status:** Aberta — decisão humana pendente. Nenhuma alteração de `TargetFramework` foi feita (reconfirmado na DV2-DEV-002: segue net8.0 em todos os projetos).
+**Decisão:** Migrar para .NET 10 LTS agora (opção 1). Decisão fornecida pelo responsável do projeto na tarefa DV2-SPRINT-001 (Etapa 2) e registrada formalmente em `docs/decisions/ADR-003-dotnet-10-lts.md`. Todos os 6 projetos da solution migrados para `net10.0`; `dotnet restore` e `dotnet build DocsViewer.sln` sem erros/warnings; aplicação executada e Interactive Server confirmado funcional em .NET 10.
+**Status:** Resolvida (2026-08-14 — ver ADR-003)
 
 ---
 

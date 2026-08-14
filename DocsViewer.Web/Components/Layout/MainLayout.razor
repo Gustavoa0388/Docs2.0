@@ -1,0 +1,32 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <header class="app-header">
+        <div class="app-header__brand">
+            <span class="app-header__mark" aria-hidden="true">DV</span>
+            <div class="app-header__titles">
+                <span class="app-header__name">DocsViewer Omni</span>
+                <span class="app-header__badge">Versão em desenvolvimento</span>
+            </div>
+        </div>
+
+        <div class="app-header__user" title="Área reservada para usuário/autenticação (não implementada nesta tarefa)">
+            <span class="app-header__user-mark" aria-hidden="true">?</span>
+            <span class="app-header__user-label">Usuário</span>
+        </div>
+    </header>
+
+    <div class="app-body">
+        <NavMenu />
+
+        <main class="app-content">
+            @Body
+        </main>
+    </div>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Ocorreu um erro inesperado.
+    <a href="" class="reload">Recarregar</a>
+    <a class="dismiss">🗙</a>
+</div>

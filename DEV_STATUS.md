@@ -1,102 +1,121 @@
 # DEV_STATUS.md
 
 ## Estado geral
-DV2-DEV-001 fechada formalmente.
+DV2-REPO-001 concluída — linha principal consolidada. DV2-DEV-002 segue
+concluída, agora com base efetiva em `main`.
 
 ## Branch atual
-claude/DV2-DEV-001-fundacao-tecnica
+feature/DV2-DEV-002-blazor-foundation — rebaseada sobre `main` (após a
+consolidação DV2-REPO-001). PR #4 aberto contra `main`.
 
 ## Tarefa atual
-DV2-DEV-001 — Criar a fundação técnica da solução (fechamento formal:
-decisões humanas para Q-001 e Q-002 aplicadas; Q-003 registrada).
+DV2-REPO-001 — Consolidação da linha principal do repositório.
 
-## Requisitos relacionados
-- CLAUDE.md — Arquitetura inicial (monólito modular, projetos)
-- CLAUDE.md — Tecnologias provisoriamente aprovadas (Blazor Web App)
-- README_CLAUDE_CODE_SETUP.md — Primeira tarefa recomendada
+## Requisitos/decisões relacionados
+- CLAUDE.md — Git ("nunca trabalhar diretamente em main"), Documentação
+- docs/decisions/ADR-001-blazor-web-app-interactive-server.md
+- docs/decisions/ADR-002-web-core-com-clientes-shell-opcionais.md
 
-## Regras relacionadas
-- docs/ARCHITECTURE.md — Dependências entre projetos
+## O que foi feito (DV2-REPO-001)
+1. Inspecionados os PRs #1, #2, #3 e #4 e seus commits (`mergeable_state`
+   de #1 e #3 confirmado como `clean` contra `main` antes de qualquer
+   ação).
+2. Confirmado que o PR #1 contém a fundação técnica esperada da
+   DV2-DEV-001 (DocsViewer.sln + 6 projetos + ADR-001 + fechamento
+   formal).
+3. **PR #1 mergeado em `main`** via merge commit (`1570610`), preservando
+   os commits originais `7cf0f2d` e `5c69b93` sem reescrevê-los.
+4. **PR #3 (ADR-002) mergeado em `main`** via merge commit (`263d431`),
+   preservando o commit original `0a07d12`. ADR-001 preservado (arquivos
+   distintos, sem conflito).
+5. **PR #2 (URS v0.1) não foi mergeado.** Comentário registrado no PR
+   (https://github.com/Gustavoa0388/Docs2.0/pull/2) explicando que está
+   superado pelas versões vigentes mais recentes (DV2-URS-001 v0.2 etc.,
+   ainda fora do repositório) e deve ser substituído por atualização
+   documental posterior. A branch `docs/DV2-URS-001-v0.1` foi preservada
+   intacta para referência histórica — nenhum commit foi perdido.
+6. `feature/DV2-DEV-002-blazor-foundation` **rebaseada sobre a `main`**
+   consolidada (`git rebase main`). Rebase limpo, sem conflitos: como os
+   commits da DV2-DEV-001 foram preservados via merge commit (não
+   reescritos), o merge-base entre a branch e `main` já era `5c69b93`, e
+   apenas o commit da DEV-002 (`4fb95cc` → `7eb1485` após rebase) precisou
+   ser reaplicado.
+7. Confirmado que o diff `main...feature/DV2-DEV-002-blazor-foundation`
+   contém somente arquivos da DEV-002 (`DocsViewer.Web/Components/**`,
+   `Program.cs`, `wwwroot/**`, além das atualizações de `DEV_STATUS.md` e
+   `docs/handoff/OPEN_QUESTIONS.md`).
+8. `dotnet restore` + `dotnet build DocsViewer.sln` executados na branch
+   rebaseada — sem erros.
+9. Aplicação executada (`dotnet run --project DocsViewer.Web`) e
+   validada via HTTP — funcionamento básico confirmado, sem exceções.
 
-## Alterações realizadas
-**Parte 1 (scaffolding):** Criada a solution `DocsViewer.sln` com os 6
-projetos previstos no CLAUDE.md (Domain, Application, Infrastructure, Web,
-UnitTests, IntegrationTests), todos vazios (sem entidades, sem
-controllers, sem páginas, sem autenticação/autorização, sem banco).
-Adicionadas as referências entre projetos principais definidas em
-docs/ARCHITECTURE.md. Removido o endpoint de exemplo do template padrão
-do projeto Web e os `Class1.cs` de exemplo dos class libraries. Adicionado
-`.gitignore` padrão do .NET.
+Nenhuma alteração funcional nova foi feita (sem banco, entidades,
+autenticação ou qualquer nova funcionalidade) — esta tarefa foi
+exclusivamente de organização de repositório/Git.
 
-**Parte 2 (fechamento formal):**
-- Criado `docs/decisions/ADR-001-blazor-web-app-interactive-server.md`,
-  registrando a decisão aprovada pelo responsável do projeto: Blazor Web
-  App com **Interactive Server** como modelo de renderização da primeira
-  versão (WebAssembly e Auto descartados nesta fase). Nenhuma alteração
-  de código foi feita em DocsViewer.Web — o ADR registra a decisão para
-  quando a tarefa de UI/Viewer for aberta.
-- Q-001 e Q-002 marcadas como Resolvidas em
-  docs/handoff/OPEN_QUESTIONS.md, com a decisão registrada em cada uma.
-- Adicionadas as referências de teste decididas pelo responsável do
-  projeto: `DocsViewer.UnitTests` → `DocsViewer.Domain` e
-  `DocsViewer.Application`; `DocsViewer.IntegrationTests` →
-  `DocsViewer.Application` e `DocsViewer.Infrastructure` (referência a
-  `DocsViewer.Web` fica para quando um teste real precisar do host Web).
-- Removidos os `UnitTest1.cs` de exemplo de ambos os projetos de teste,
-  que permanecem vazios (mantido apenas `GlobalUsings.cs`).
-- Registrada Q-003 em docs/handoff/OPEN_QUESTIONS.md: análise objetiva
-  .NET 8 LTS vs .NET 10 LTS (datas de fim de suporte, maturidade, custo de
-  migração) com recomendação de migrar para .NET 10 LTS, para decisão
-  humana. **Nenhuma alteração de TargetFramework foi feita** — segue
-  net8.0 em todos os projetos.
+## Migrations
+Nenhuma.
 
-## Arquivos alterados
-- docs/decisions/ADR-001-blazor-web-app-interactive-server.md (novo)
-- docs/handoff/OPEN_QUESTIONS.md (Q-001 e Q-002 resolvidas; Q-003 criada)
-- DocsViewer.UnitTests/DocsViewer.UnitTests.csproj (referências a Domain e Application adicionadas)
-- DocsViewer.IntegrationTests/DocsViewer.IntegrationTests.csproj (referências a Application e Infrastructure adicionadas)
-- DocsViewer.UnitTests/UnitTest1.cs (removido)
-- DocsViewer.IntegrationTests/UnitTest1.cs (removido)
-- DEV_STATUS.md (este arquivo)
+## Banco
+Não implementado.
 
-## Banco / migrations
-Nenhuma — fora do escopo desta tarefa.
+## Testes
+Nenhum teste novo. Build da solution (incluindo DocsViewer.UnitTests e
+DocsViewer.IntegrationTests) confirmado sem erros após o rebase.
 
-## Testes criados
-Nenhum teste real — fora do escopo. Os projetos DocsViewer.UnitTests e
-DocsViewer.IntegrationTests permanecem vazios (sem nenhum arquivo de
-teste), apenas com as referências de projeto corretas já configuradas.
+## Resultado de restore
+`dotnet restore DocsViewer.sln` — sem erros, todos os 6 projetos
+restaurados.
 
-## Resultado dos testes
+## Resultado de build
 `dotnet build DocsViewer.sln` — Build succeeded, 0 Warning(s), 0 Error(s).
-Critério de aceite da tarefa atendido após as alterações de fechamento.
 
-## Decisões/assumptions
-- **Q-001 (resolvida):** Blazor Web App com Interactive Server — decisão
-  do responsável do projeto, registrada em ADR-001. Implementação do
-  scaffolding Blazor fica para tarefa futura de UI/Viewer.
-- **Q-002 (resolvida):** referências de teste definidas pelo responsável
-  do projeto (ver acima).
-- **Q-003 (aberta):** recomendação registrada de migrar para .NET 10 LTS
-  (fundamentada em datas de fim de suporte: .NET 8 termina em 10/11/2026,
-  .NET 10 é suportado até 11/2028), mas decisão e execução dependem de
-  aprovação humana explícita. TargetFramework não foi alterado.
-- Framework de teste adotado: xUnit (assumption já registrada na criação
-  da tarefa, sem impacto arquitetural).
+## Resultado da execução
+`dotnet run --project DocsViewer.Web` (perfil http, ASPNETCORE_ENVIRONMENT=Development):
+aplicação iniciou sem exceções; `GET /`, `/documentos`, `/favoritos`,
+`/solicitacoes`, `/administracao`, `/app.css`, `/favicon.svg`,
+`/_framework/blazor.web.js` → todos 200.
+
+## Decisões tomadas
+- Merge de PR #1 e PR #3 em `main` usando método **merge commit** (não
+  squash/rebase), para preservar os SHAs originais dos commits — em linha
+  com "não perder commits existentes".
+- PR #2 deliberadamente não mergeado; tratado como superado, registrado
+  via comentário no próprio PR e em Q-004, sem fechar/excluir o PR ou a
+  branch (decisão de fechar fica para o responsável do projeto).
+- `feature/DV2-DEV-002-blazor-foundation` rebaseada (não recriada) sobre
+  `main`, por ser uma operação seura neste caso (sem conflitos, histórico
+  compartilhado preservado) e por deixar o PR #4 com diff limpo.
+- Nenhum documento (URS v0.2, Product Vision v0.2, Documento de Fundação
+  v0.4.2, PMP-001, BRN-001 v0.2) foi recriado de memória — permanecem
+  fora do repositório, a serem adicionados em tarefa documental separada.
+
+## Assumptions
+Nenhuma nova assumption técnica.
 
 ## Riscos
-Nenhum risco técnico novo nesta etapa. Risco já conhecido: .NET 8 LTS
-(versão atual do projeto) encerra suporte em 10/11/2026 — ver Q-003.
+- PR #2 permanece aberto e desatualizado (URS v0.1) — risco de alguém
+  reabrir/mergear por engano no futuro sem checar o comentário de
+  "superado". Mitigado por comentário explícito no PR e por Q-004.
+- Documentos oficiais v0.2 (Product Vision, Documento de Fundação, PMP,
+  URS, BRN) ainda não estão no repositório — bloqueia tarefas futuras de
+  domínio/negócio (Q-004, ainda aberta).
+- Risco já conhecido: .NET 8 LTS encerra suporte em 10/11/2026 — Q-003
+  ainda aberta, sem decisão.
 
 ## Pendências
-- Q-003: decisão humana sobre migrar (ou não) para .NET 10 LTS antes de
-  a fundação técnica avançar mais.
-- Implementação do scaffolding Blazor Web App (Interactive Server) em
-  DocsViewer.Web, quando houver tarefa formal de UI/Viewer.
-- Referência de DocsViewer.IntegrationTests para DocsViewer.Web, quando
-  houver teste real que precise subir o host Web.
+- Q-003: decisão humana sobre migrar (ou não) para .NET 10 LTS.
+- Q-004: aguardando os documentos oficiais v0.2 serem adicionados ao
+  repositório (tarefa documental separada).
+- Q-005: **resolvida** nesta tarefa (main consolidada).
+- Implementação real dos clientes-shell Windows/Android (ADR-002) — fora
+  de escopo até tarefa formal.
 
-## Próximo passo
-Aguardar decisão humana sobre Q-003 e a próxima tarefa formal (ex.:
-fundação de banco/EF Core ou primeiras entidades de Domain, conforme
-ROADMAP.md — Fase 1).
+## Próximo passo sugerido
+Revisar o PR #4 (agora com base efetiva em `main` e diff restrito à
+DEV-002) e decidir sobre o merge. Em paralelo, priorizar a tarefa
+documental que trará DV2-000 v0.2, DV2-001 v0.4.2, DV2-PMP-001,
+DV2-URS-001 v0.2 e DV2-BRN-001 v0.2 ao repositório (resolve Q-004), e a
+decisão humana sobre Q-003 (.NET 8 vs .NET 10). Só então iniciar a
+próxima tarefa de produto (ex.: banco/EF Core ou primeiras entidades de
+Domain, conforme ROADMAP.md).

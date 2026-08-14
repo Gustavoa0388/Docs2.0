@@ -1,0 +1,17 @@
+@page "/documentos"
+@page "/favoritos"
+@page "/solicitacoes"
+@page "/administracao"
+@inject NavigationManager Navigation
+
+<PageTitle>Funcionalidade ainda não implementada — DocsViewer Omni</PageTitle>
+
+<section class="not-implemented">
+    <h1>Funcionalidade ainda não implementada</h1>
+    <p>Esta área do DocsViewer Omni faz parte da navegação prevista, mas seu comportamento ainda não foi construído.</p>
+    <p class="not-implemented__route">Rota acessada: <code>@RelativePath</code></p>
+</section>
+
+@code {
+    private string RelativePath => Navigation.ToBaseRelativePath(Navigation.Uri);
+}

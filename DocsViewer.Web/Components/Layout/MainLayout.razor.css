@@ -1,0 +1,115 @@
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    flex-wrap: wrap;
+}
+
+.app-header__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.app-header__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.15);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.app-header__titles {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.app-header__name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.app-header__badge {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.app-header__user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.85;
+}
+
+.app-header__user-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+.app-header__user-label {
+    font-size: 0.85rem;
+}
+
+.app-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.app-content {
+    flex: 1;
+    padding: 1.5rem;
+    background-color: var(--color-bg);
+    min-width: 0;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+    #blazor-error-ui .dismiss {
+        cursor: pointer;
+        position: absolute;
+        right: 0.75rem;
+        top: 0.5rem;
+    }
+
+@media (max-width: 768px) {
+    .app-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .app-content {
+        padding: 1rem;
+    }
+}

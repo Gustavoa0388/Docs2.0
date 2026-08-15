@@ -32,6 +32,8 @@ docs/
 
 Os seis artefatos acima constituem as referências documentais ativas do projeto enquanto não houver baseline ou revisão formal posterior. Versões Draft anteriores permanecem apenas como histórico e não devem orientar novas implementações quando houver conflito com a versão ativa.
 
+A incorporação dos seis arquivos oficiais foi verificada na branch documental `docs/DV2-DOC-002-official-drafts` em 15/08/2026. As questões Q-004 e Q-007, relacionadas à ausência desses documentos no repositório/ambiente de desenvolvimento, foram encerradas.
+
 ## Documentos de metodologia existentes
 
 Permanecem nos caminhos atuais para não quebrar referências já utilizadas pelo desenvolvimento:

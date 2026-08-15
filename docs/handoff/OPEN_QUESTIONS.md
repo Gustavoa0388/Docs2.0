@@ -72,4 +72,41 @@
 **Pergunta:** Formalizar `Web -> Infrastructure` para composição/DI ou exigir ADR específico?
 **Impacto:** Afeta o grafo formal de dependências da solução.
 **Opções identificadas (sem escolher):** atualizar `ARCHITECTURE.md`; criar ADR; manter como detalhe não documentado.
-**Status:** Aberta — será encerrada na DV2-DEV-004 com a formalização de `Web -> Infrastructure` exclusivamente como Composition Root.
+**Decisão:** `Web -> Infrastructure` formalizado em `docs/ARCHITECTURE.md` exclusivamente como Composition Root (registro de implementações de infraestrutura na inicialização, ex.: `Program.cs`). As demais regras de dependência do monólito modular permanecem inalteradas e proibidas (`Domain -> Infrastructure`, `Domain -> Web`, `Application -> Infrastructure`, `Application -> Web`, `Infrastructure -> Web`).
+**Status:** Resolvida (2026-08-15 — DV2-DEV-004, ver docs/ARCHITECTURE.md)
+
+---
+
+### Q-007
+**Data:** 2026-08-15
+**Tarefa:** DV2-SPRINT-002
+**Requisito:** Documentação oficial do produto (Q-004)
+**Pergunta:** Com os 6 documentos oficiais incorporados ao repositório pela DV2-DOC-002 (`DV2-000`, `DV2-001`, `DV2-PMP-001`, `DV2-URS-001 v0.3`, `DV2-BRN-001 v0.2`, `DV2-TRM-001 v0.1`), esses arquivos estão de fato utilizáveis como fonte de verdade para revisão documental de tarefas de domínio?
+**Impacto:** Determina se a revisão documental da DV2-DEV-004 (e tarefas futuras) pode se basear nos arquivos `.docx`/`.xlsx` reais ou depende de fontes alternativas.
+**Achado (não presumir corrigido sem verificação):** Verificação técnica (comando `file`, dump hexadecimal e `python zipfile.ZipFile`) confirmou que **4 dos 6 arquivos estão corrompidos/ilegíveis** no commit atual de `main`: `DV2-000_Product_Vision_v0.2_Draft.docx`, `DV2-001_Documento_de_Fundacao_v0.4.2_Draft.docx`, `DV2-PMP-001_Plano_Mestre_do_Projeto_v0.1_Draft.docx` e `DV2-URS-001_Especificacao_de_Requisitos_do_Usuario_v0.3_Draft.docx` não são arquivos ZIP/OOXML válidos (`BadZipFile: File is not a zip file`) — não abrem no Word nem em ferramentas de extração. Apenas `DV2-BRN-001...docx` (regras de negócio) e `DV2-TRM-001...xlsx` (matriz URS × BRN, com o texto integral dos 232 requisitos URS e das 92 regras BRN) são arquivos válidos e íntegros.
+**Mitigação aplicada nesta tarefa:** A revisão documental da DV2-DEV-004 (Etapa 2 da DV2-SPRINT-002) foi realizada com base no conteúdo íntegro de `DV2-BRN-001` e `DV2-TRM-001`, que juntos cobrem o texto completo dos requisitos URS (via a aba URS-BRN de `DV2-TRM-001`) e das regras de negócio — substituindo, na prática, o `DV2-URS-001.docx` corrompido. `DV2-000`, `DV2-001` e `DV2-PMP-001` permanecem sem substituto disponível nesta tarefa.
+**Status:** Resolvida quanto à presença dos documentos no repositório (encerrando a pendência original da Q-004/Q-007 — os arquivos existem em `main` desde a DV2-DOC-002). **Permanece pendência distinta e não encerrada:** os 4 arquivos `.docx` citados acima precisam ser re-upload/re-gerados como OOXML válido antes de servirem como fonte de verdade documental; até lá, qualquer tarefa que precise de `DV2-000`, `DV2-001`, `DV2-PMP-001` ou do texto integral formatado de `DV2-URS-001` deve tratar esse conteúdo como indisponível e não deve presumir ou reconstruir seu conteúdo. Recomenda-se abrir uma tarefa documental dedicada (ex.: `DV2-DOC-003`) para corrigir os arquivos corrompidos.
+
+---
+
+### Q-008
+**Data:** 2026-08-15
+**Tarefa:** DV2-SPRINT-002
+**Requisito:** Modelo de domínio documental (Document/DocumentRevision/OfficialFile)
+**Pergunta:** O domínio documental da DV2-DEV-004 deveria introduzir `OrganizationId` (ou equivalente) para suportar múltiplas organizações/implantações?
+**Impacto:** Afetaria o modelo de dados, as migrations e potencialmente toda a arquitetura de persistência.
+**Opções identificadas (sem escolher):** introduzir `OrganizationId` nas entidades já nesta fase; adiar a decisão de multi-tenancy para uma tarefa/ADR específico.
+**Decisão:** Não introduzir `OrganizationId` nesta fase. Configurabilidade por organização (CLAUDE.md — "Produto x implantação") não equivale a multi-tenancy; a arquitetura de tenancy será decidida posteriormente, em tarefa/ADR dedicado, quando houver necessidade concreta. Nenhuma migration relacionada a Organization foi criada na DV2-DEV-004.
+**Status:** Resolvida (2026-08-15 — decisão humana, DV2-SPRINT-002)
+
+---
+
+### Q-009
+**Data:** 2026-08-15
+**Tarefa:** DV2-SPRINT-002
+**Requisito:** Modelo de domínio documental — estados de disponibilização/vigência
+**Pergunta:** A ausência de modelagem de estados de disponibilização (vigência/aprovação/obsolescência) na DV2-DEV-004 é uma lacuna a ser corrigida nesta tarefa, ou pode ser tratada em tarefa futura?
+**Impacto:** Determina se `Document`/`DocumentRevision` precisam de um campo/estado adicional já na DV2-DEV-004, ou se o escopo atual (documento e revisão sem noção de vigência) permanece válido.
+**Opções identificadas (sem escolher):** modelar estados de disponibilização já na DV2-DEV-004; criar um enum provisório apenas para não deixar a pergunta em aberto; transferir a modelagem funcional formalmente para uma tarefa futura dedicada.
+**Decisão:** Estados de disponibilização não devem ser confundidos com vigência/aprovação/obsolescência do processo de controle documental da organização. A ausência de modelagem de disponibilização na DV2-DEV-004 é aceitável. Nenhum enum improvisado foi criado apenas para encerrar esta questão.
+**Status:** Resolvida para o escopo da DEV-004; modelagem funcional transferida formalmente para DV2-DEV-005.

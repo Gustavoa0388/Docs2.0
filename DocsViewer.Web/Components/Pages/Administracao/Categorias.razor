@@ -1,0 +1,188 @@
+@page "/administracao/categorias"
+@rendermode InteractiveServer
+@using DocsViewer.Application.Categories
+@using DocsViewer.Domain.Categories
+@inject CategoryService CategoryService
+
+<PageTitle>Categorias — DocsViewer Omni</PageTitle>
+
+<section class="admin-page">
+    <h1>Categorias</h1>
+    <p class="admin-page__subtitle">Categorias documentais hierárquicas, com pai opcional.</p>
+
+    @if (_errorMessage is not null)
+    {
+        <p class="form-error">@_errorMessage</p>
+    }
+
+    <div class="admin-panel">
+        <h2 class="admin-panel__title">Nova categoria</h2>
+        <EditForm Model="_newCategory" OnValidSubmit="CreateAsync" FormName="new-category">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <label for="new-category-name">Nome</label>
+                <InputText id="new-category-name" @bind-Value="_newCategory.Name" />
+            </div>
+            <div class="form-row">
+                <label for="new-category-parent">Categoria pai</label>
+                <select id="new-category-parent" @bind="_newCategory.ParentCategoryId">
+                    <option value="">(nenhuma — categoria raiz)</option>
+                    @foreach (var category in _categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn--primary">Nova categoria</button>
+        </EditForm>
+    </div>
+
+    <div class="admin-panel">
+        <h2 class="admin-panel__title">Categorias cadastradas</h2>
+
+        @if (_categories.Count == 0)
+        {
+            <p class="admin-panel__empty">Nenhuma categoria cadastrada.</p>
+        }
+        else
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Categoria pai</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var category in _categories)
+                    {
+                        @if (_editingId == category.Id)
+                        {
+                            <tr>
+                                <td><InputText @bind-Value="_editName" /></td>
+                                <td>
+                                    <select @bind="_editParentCategoryId">
+                                        <option value="">(nenhuma — categoria raiz)</option>
+                                        @foreach (var parentOption in _categories.Where(c => c.Id != category.Id))
+                                        {
+                                            <option value="@parentOption.Id">@parentOption.Name</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <button class="btn btn--small btn--primary" @onclick="() => SaveEditAsync(category.Id)">Salvar</button>
+                                    <button class="btn btn--small" @onclick="CancelEdit">Cancelar</button>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>@category.Name</td>
+                                <td>@ParentName(category.ParentCategoryId)</td>
+                                <td>
+                                    <button class="btn btn--small" @onclick="() => StartEdit(category)">Editar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>
+
+@code {
+    private List<Category> _categories = new();
+    private NewCategoryModel _newCategory = new();
+    private string? _errorMessage;
+
+    private Guid? _editingId;
+    private string _editName = string.Empty;
+    private string _editParentCategoryId = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        var categories = await CategoryService.ListAsync();
+        _categories = categories.ToList();
+    }
+
+    private async Task CreateAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            Guid? parentId = string.IsNullOrWhiteSpace(_newCategory.ParentCategoryId)
+                ? null
+                : Guid.Parse(_newCategory.ParentCategoryId);
+
+            await CategoryService.CreateAsync(_newCategory.Name, parentId);
+
+            _newCategory = new NewCategoryModel();
+            await ReloadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void StartEdit(Category category)
+    {
+        _errorMessage = null;
+        _editingId = category.Id;
+        _editName = category.Name;
+        _editParentCategoryId = category.ParentCategoryId?.ToString() ?? string.Empty;
+    }
+
+    private void CancelEdit()
+    {
+        _editingId = null;
+    }
+
+    private async Task SaveEditAsync(Guid id)
+    {
+        _errorMessage = null;
+
+        try
+        {
+            await CategoryService.RenameAsync(id, _editName);
+
+            Guid? parentId = string.IsNullOrWhiteSpace(_editParentCategoryId)
+                ? null
+                : Guid.Parse(_editParentCategoryId);
+
+            await CategoryService.SetParentAsync(id, parentId);
+
+            _editingId = null;
+            await ReloadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private string ParentName(Guid? parentCategoryId)
+    {
+        if (parentCategoryId is null)
+        {
+            return "—";
+        }
+
+        return _categories.FirstOrDefault(c => c.Id == parentCategoryId)?.Name ?? "—";
+    }
+
+    private sealed class NewCategoryModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string ParentCategoryId { get; set; } = string.Empty;
+    }
+}

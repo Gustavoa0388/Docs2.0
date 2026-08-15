@@ -1,0 +1,82 @@
+@page "/documentos"
+@rendermode InteractiveServer
+@using DocsViewer.Application.Categories
+@using DocsViewer.Application.DocumentTypes
+@using DocsViewer.Application.Documents
+@inject DocumentService DocumentService
+@inject CategoryService CategoryService
+@inject DocumentTypeService DocumentTypeService
+
+<PageTitle>Documentos — DocsViewer Omni</PageTitle>
+
+<section class="admin-page">
+    <div class="admin-page__header">
+        <div>
+            <h1>Documentos</h1>
+            <p class="admin-page__subtitle">Catálogo de documentos cadastrados.</p>
+        </div>
+        <a class="btn btn--primary" href="documentos/novo">Novo documento</a>
+    </div>
+
+    @if (_documents.Count == 0)
+    {
+        <p class="admin-panel__empty">Nenhum documento cadastrado.</p>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Título</th>
+                    <th>Categoria</th>
+                    <th>Tipo documental</th>
+                    <th>Revisões</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var document in _documents)
+                {
+                    <tr>
+                        <td>@document.Code</td>
+                        <td>@document.Title</td>
+                        <td>@CategoryName(document.CategoryId)</td>
+                        <td>@DocumentTypeName(document.DocumentTypeId)</td>
+                        <td>@RevisionSummary(document)</td>
+                        <td><a href="documentos/@document.Id">Ver detalhes</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private List<Domain.Documents.Document> _documents = new();
+    private Dictionary<Guid, string> _categoryNames = new();
+    private Dictionary<Guid, string> _documentTypeNames = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var documents = await DocumentService.ListAsync();
+        _documents = documents.ToList();
+
+        var categories = await CategoryService.ListAsync();
+        _categoryNames = categories.ToDictionary(c => c.Id, c => c.Name);
+
+        var documentTypes = await DocumentTypeService.ListAsync();
+        _documentTypeNames = documentTypes.ToDictionary(t => t.Id, t => t.Name);
+    }
+
+    private string CategoryName(Guid? categoryId)
+        => categoryId is not null && _categoryNames.TryGetValue(categoryId.Value, out var name) ? name : "—";
+
+    private string DocumentTypeName(Guid? documentTypeId)
+        => documentTypeId is not null && _documentTypeNames.TryGetValue(documentTypeId.Value, out var name) ? name : "—";
+
+    private static string RevisionSummary(Domain.Documents.Document document)
+        => document.Revisions.Count == 0
+            ? "Sem revisão"
+            : string.Join(", ", document.Revisions.Select(r => r.RevisionIdentifier));
+}

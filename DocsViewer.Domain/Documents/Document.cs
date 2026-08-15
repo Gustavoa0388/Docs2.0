@@ -18,6 +18,13 @@ public sealed class Document
     /// </summary>
     public string Code { get; private set; } = null!;
 
+    /// <summary>
+    /// Título/nome do documento. Exigido por URS-UX-002 e URS-VWR-013 (DV2-URS-001 v0.3):
+    /// "Código, título, revisão e condição documental relevante devem possuir apresentação
+    /// clara"/"ser identificáveis" durante consulta e visualização.
+    /// </summary>
+    public string Title { get; private set; } = null!;
+
     public Guid? CategoryId { get; private set; }
 
     public Guid? DocumentTypeId { get; private set; }
@@ -30,7 +37,7 @@ public sealed class Document
     {
     }
 
-    public Document(Guid id, string code, Guid? categoryId = null, Guid? documentTypeId = null)
+    public Document(Guid id, string code, string title, Guid? categoryId = null, Guid? documentTypeId = null)
     {
         if (id == Guid.Empty)
         {
@@ -42,8 +49,14 @@ public sealed class Document
             throw new ArgumentException("Document.Code é obrigatório.", nameof(code));
         }
 
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("Document.Title é obrigatório.", nameof(title));
+        }
+
         Id = id;
         Code = code;
+        Title = title;
         CategoryId = categoryId;
         DocumentTypeId = documentTypeId;
     }

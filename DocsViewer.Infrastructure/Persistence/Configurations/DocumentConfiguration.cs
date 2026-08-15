@@ -20,6 +20,11 @@ public sealed class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder.Property(d => d.Code)
             .IsRequired();
 
+        // Título exigido por URS-UX-002 / URS-VWR-013 (DV2-URS-001 v0.3). Sem limite de
+        // tamanho definido em documentação aprovada.
+        builder.Property(d => d.Title)
+            .IsRequired();
+
         // Comportamento conservador de exclusão: não é possível excluir uma Category ou
         // DocumentType em uso por um Document.
         builder.HasOne<Category>()

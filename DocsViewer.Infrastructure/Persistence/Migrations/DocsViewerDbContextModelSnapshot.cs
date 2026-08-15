@@ -70,6 +70,10 @@ namespace DocsViewer.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("DocumentTypeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");

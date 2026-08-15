@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocsViewer.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(DocsViewerDbContext))]
-    [Migration("20260815013214_InitialDocumentDomain")]
+    [Migration("20260815130205_InitialDocumentDomain")]
     partial class InitialDocumentDomain
     {
         /// <inheritdoc />
@@ -72,6 +72,10 @@ namespace DocsViewer.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("DocumentTypeId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

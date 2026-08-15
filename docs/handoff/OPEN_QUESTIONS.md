@@ -16,9 +16,7 @@
 **Data:** 2026-08-07
 **Tarefa:** DV2-DEV-001
 **Requisito:** CLAUDE.md — Tecnologias provisoriamente aprovadas (Blazor Web App)
-**Pergunta:** DocsViewer.Web foi criado como projeto ASP.NET Core mínimo (`dotnet new web`, sem páginas/componentes) porque a tarefa DV2-DEV-001 excluiu explicitamente "interface", "páginas" e "controllers" do escopo. O CLAUDE.md aprova "Blazor Web App" como tecnologia, mas não define o modelo de hospedagem/renderização (Server, WebAssembly ou Auto). Qual modelo deve ser adotado quando a UI entrar em escopo, e em qual tarefa isso deve ser decidido/formalizado (ADR)?
-**Impacto:** Afeta a configuração de Program.cs, estrutura de componentes, App.razor e possivelmente a arquitetura de comunicação cliente-servidor do módulo Viewer.
-**Opções identificadas (sem escolher):** Blazor Server; Blazor WebAssembly hospedado; Blazor Web App com render mode Auto.
+**Pergunta:** DocsViewer.Web foi criado como projeto ASP.NET Core mínimo (`dotnet new web`, sem páginas/componentes) porque a tarefa DV2-DEV-001 excluiu explicitamente "interface", "páginas" e "controllers" do escopo. O CLAUDE.md aprova "Blazor Web App" como tecnologia, mas não define o modelo de hospedagem/renderização (Server, WebAssembly ou Auto).
 **Decisão:** Blazor Web App com **Interactive Server** como modelo principal de renderização da primeira versão. WebAssembly e Auto descartados nesta fase. Decisão registrada em `docs/decisions/ADR-001-blazor-web-app-interactive-server.md`.
 **Status:** Resolvida (2026-08-07 — ver ADR-001)
 
@@ -67,9 +65,38 @@
 
 ### Q-006
 **Data:** 2026-08-14
-**Tarefa:** DV2-DEV-003
+**Tarefa:** DV2-DEV-003 / DV2-DEV-004
 **Requisito:** docs/ARCHITECTURE.md — Dependências
 **Pergunta:** Formalizar `Web -> Infrastructure` para composição/DI ou exigir ADR específico?
-**Impacto:** Afeta o grafo formal de dependências da solução.
-**Opções identificadas (sem escolher):** atualizar `ARCHITECTURE.md`; criar ADR; manter como detalhe não documentado.
-**Status:** Aberta — será encerrada na DV2-DEV-004 com a formalização de `Web -> Infrastructure` exclusivamente como Composition Root.
+**Decisão:** `DocsViewer.Web` pode depender de `DocsViewer.Infrastructure` exclusivamente como Composition Root, para registro e configuração de implementações de infraestrutura na inicialização. Permanecem proibidas as dependências `Domain -> Infrastructure`, `Domain -> Web`, `Application -> Infrastructure`, `Application -> Web` e `Infrastructure -> Web`. A relação foi formalizada em `docs/ARCHITECTURE.md` pela DV2-DEV-004.
+**Status:** Resolvida (2026-08-15 — DV2-DEV-004)
+
+---
+
+### Q-007
+**Data:** 2026-08-15
+**Tarefa:** DV2-DEV-004 / DV2-DOC-002
+**Requisito:** Documentação oficial do produto
+**Pergunta:** O pacote documental oficial citado pela DV2-DEV-004 não foi localizado no ambiente do Claude Code.
+**Decisão:** Os seis artefatos oficiais em Draft foram incorporados à branch documental `docs/DV2-DOC-002-official-drafts` e verificados diretamente no GitHub: Product Vision v0.2, Fundação v0.4.2, PMP v0.1, URS v0.3, BRN v0.2 corrigido e TRM v0.1.
+**Status:** Resolvida (2026-08-15 — DV2-DOC-002)
+
+---
+
+### Q-008
+**Data:** 2026-08-15
+**Tarefa:** DV2-DEV-004
+**Requisito:** Configuração organizacional / domínio documental
+**Pergunta:** Deve ser introduzido `OrganizationId` nas entidades de domínio nesta fase?
+**Decisão:** Não modelar `OrganizationId` nesta fase. A capacidade de configuração por organização não implica, por si só, arquitetura multi-tenant. O modelo de tenancy deverá ser definido em decisão arquitetural específica antes de introduzir chave organizacional nas entidades.
+**Status:** Resolvida (2026-08-15 — decisão do responsável do produto)
+
+---
+
+### Q-009
+**Data:** 2026-08-15
+**Tarefa:** DV2-DEV-004
+**Requisito:** Disponibilização de representações documentais
+**Pergunta:** Quais estados internos de disponibilização devem ser modelados no domínio?
+**Decisão:** A ausência de estados definitivos não bloqueia o domínio estrutural da DV2-DEV-004. A modelagem de disponibilização será tratada na DV2-DEV-005/FRS correspondente, distinguindo explicitamente estado interno de disponibilização do DocsViewer da vigência/obsolescência documental definida externamente. Nomes antigos de permissões não devem ser tratados como estados de domínio.
+**Status:** Resolvida para a DV2-DEV-004; modelagem funcional pendente da DV2-DEV-005 (2026-08-15)

@@ -1,15 +1,11 @@
 # 00-product — Visão de Produto
 
-Esta pasta é destinada aos documentos de visão de produto do DocsViewer Omni.
+Esta pasta contém os documentos de visão de produto do DocsViewer Omni.
 
-## Documento esperado
+## Documento vigente em Draft
 
-- **DV2-000 — Product Vision**, versão vigente: **v0.2**.
+- `DV2-000_Product_Vision_v0.2_Draft.docx` — **DV2-000 — Product Vision v0.2 Draft**.
 
-## Status
+O arquivo DOCX acima é a referência documental ativa desta pasta enquanto não houver baseline/aprovação formal posterior.
 
-**Ausente.** O arquivo oficial (DOCX/PDF ou equivalente) ainda não foi adicionado a este repositório. Nenhum conteúdo foi reconstruído de memória ou a partir de versões antigas.
-
-Referência de contexto de produto disponível hoje no repositório (não substitui o documento oficial): `docs/PROJECT_CONTEXT.md`.
-
-Ver `docs/handoff/OPEN_QUESTIONS.md` — Q-004.
+Referência complementar de contexto técnico: `docs/PROJECT_CONTEXT.md`.

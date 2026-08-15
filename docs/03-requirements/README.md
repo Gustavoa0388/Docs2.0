@@ -1,15 +1,11 @@
 # 03-requirements — Requisitos
 
-Esta pasta é destinada à Especificação de Requisitos do Usuário do DocsViewer Omni.
+Esta pasta contém a Especificação de Requisitos do Usuário do DocsViewer Omni.
 
-## Documento esperado
+## Documento vigente em Draft
 
-- **DV2-URS-001 — Especificação de Requisitos do Usuário**, versão vigente: **v0.2**.
+- `DV2-URS-001_Especificacao_de_Requisitos_do_Usuario_v0.3_Draft.docx` — **DV2-URS-001 — Especificação de Requisitos do Usuário v0.3 Draft**.
 
-## Status
+A v0.3 substitui as versões Draft anteriores como referência ativa. O PR #2, baseado na v0.1 Draft, permanece apenas como histórico e não deve ser tratado como fonte vigente.
 
-**Ausente.** O arquivo oficial da v0.2 ainda não foi adicionado a este repositório.
-
-Existe um registro histórico de uma tentativa anterior baseada na **v0.1 Draft** (PR #2, branch `docs/DV2-URS-001-v0.1`), mas ela foi formalmente marcada como **superada** pela v0.2 e **não foi mergeada** em `main` — ver comentário no PR #2 e `docs/handoff/OPEN_QUESTIONS.md` (Q-004). O conteúdo da v0.1 não deve ser tratado como fonte vigente nem foi replicado aqui.
-
-Nenhum requisito foi reconstruído de memória, de conversas ou da v0.1 superada.
+A v0.3 consolida a fronteira aprovada em que o processo documental da organização controla elaboração/revisão/aprovação/vigência, enquanto o DocsViewer Omni controla a representação digital, disponibilização, consulta, histórico digital e rastreabilidade.

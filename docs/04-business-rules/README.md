@@ -1,13 +1,11 @@
 # 04-business-rules — Regras de Negócio
 
-Esta pasta é destinada à documentação de Regras de Negócio do DocsViewer Omni.
+Esta pasta contém a documentação de Regras de Negócio do DocsViewer Omni.
 
-## Documento esperado
+## Documento vigente em Draft
 
-- **DV2-BRN-001 — Regras de Negócio**, versão vigente: **v0.2 corrigido**.
+- `DV2-BRN-001_Especificacao_de_Regras_de_Negocio_v0.2_Draft_CORRIGIDO.docx` — **DV2-BRN-001 — Especificação de Regras de Negócio v0.2 Draft corrigido**.
 
-## Status
+O arquivo acima é a referência documental ativa desta pasta enquanto não houver baseline ou revisão formal posterior.
 
-**Ausente.** O arquivo oficial ainda não foi adicionado a este repositório. Nenhuma regra de negócio foi reconstruída de memória ou inventada para preencher esta lacuna — conforme `CLAUDE.md` (Regra principal), nenhuma regra é implementada sem que esteja documentada e aprovada.
-
-Ver `docs/handoff/OPEN_QUESTIONS.md` — Q-004.
+A BRN deve ser utilizada em conjunto com a URS vigente e com as decisões arquiteturais aplicáveis. Regras específicas de uma implantação não devem ser presumidas como regras universais do produto.

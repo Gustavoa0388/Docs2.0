@@ -1,18 +1,97 @@
 # DEV_STATUS.md
 
 ## Estado geral
-DV2-SPRINT-002 concluída: (1) DV2-DEV-004 consolidada contra a documentação
-oficial real (`DV2-BRN-001 v0.2`, `DV2-TRM-001 v0.1`) e integrada em `main`
-via PR #9; (2) DV2-DEV-005 entrega o primeiro cadastro documental funcional
-(Category, DocumentType, Document, DocumentRevision) com Application,
-persistência EF Core e UI Blazor.
-
-## Branch atual
-`feature/DV2-DEV-005-document-registration` (a partir de `main` pós-merge
-do PR #9).
+DV2-DOC-003 (correção dos 4 documentos corrompidos) confirmada concluída e
+DV2-DEV-005 validada ponta a ponta contra SQL Server real (efêmero, via
+Docker). Os 6 documentos oficiais estão íntegros e legíveis em `main`; a
+auditoria da DEV-004/DEV-005 contra o texto real não encontrou divergências
+novas; PR #11 (DEV-005) atualizado e retirado de Draft.
 
 ## Tarefa atual
-DV2-SPRINT-002 — Consolidação do Domínio e Cadastro Documental Inicial.
+Fechamento DV2-DOC-003 + DV2-DEV-005 (continuação da DV2-SPRINT-002).
+
+## Branch atual
+`feature/DV2-DEV-005-document-registration` (rebaseada sobre `main` pós
+DV2-DOC-003, commit `507174a`).
+
+## Resumo desta tarefa (DV2-DOC-003 + fechamento DEV-005)
+
+### Integridade documental (Etapa 1)
+Os 4 arquivos antes corrompidos (`DV2-000`, `DV2-001`, `DV2-PMP-001`,
+`DV2-URS-001` bruto) foram substituídos manualmente por versões íntegras em
+`main` (commit `507174a591f6ae247e756e10a6c04b2c26cdb60f`). Reverificação
+técnica (mesmos métodos da DV2-DEV-004: `file`, `python zipfile.ZipFile`,
+abertura via `python-docx`/`openpyxl`, confirmação de
+`word/document.xml`/`xl/workbook.xml`) confirmou os **6 documentos
+oficiais válidos, íntegros e legíveis**. Nenhum documento foi reconstruído
+de memória — apenas os arquivos já presentes no repositório foram lidos.
+
+### Auditoria DEV-004/DEV-005 (Etapa 2)
+Extração completa de `DV2-URS-001 v0.3` (agora íntegro) e `DV2-001`
+(Fundação v0.4.2) confirmou: o texto de `DV2-URS-001` é **idêntico** ao já
+usado via `DV2-TRM-001` na revisão da DV2-DEV-004 (nenhuma divergência);
+`DV2-001` confirma explicitamente que a estratégia de tenancy/multi-
+organização permanece um "Ponto Aberto para Decisão" (seção 20) — validando
+retroativamente a decisão Q-008 de não introduzir `OrganizationId`; Document
+e Revisão permanecem conceitos distintos (10.1); DocsViewer não determina
+vigência (10.2); Category/DocumentType permanecem configuráveis (7.2).
+**Nenhuma divergência nova foi encontrada** entre o domínio implementado e
+os documentos agora completos. `DV2-000` e `DV2-PMP-001` são
+estratégicos/de governança, sem requisitos de domínio adicionais.
+
+### Rebase da DEV-005 (Etapa 3)
+`feature/DV2-DEV-005-document-registration` rebaseada sobre `main`
+(commit `507174a`) sem conflitos — nenhum arquivo de documentação foi
+tocado pelos commits da DEV-005, então o rebase foi automático.
+
+### SQL Server efêmero e CRUD real (Etapas 4-6)
+`dockerd` (pré-instalado, não em execução) foi iniciado nesta sessão e um
+container `mcr.microsoft.com/mssql/server:2022-latest` efêmero foi criado
+com senha temporária gerada por sessão (nunca versionada). `dotnet ef
+database update` aplicou a migration `InitialDocumentDomain` do zero:
+5 tabelas de domínio confirmadas, 6 FKs todas `NO_ACTION`/Restrict, nenhuma
+coluna `OrganizationId` (consulta direta a `INFORMATION_SCHEMA`/
+`sys.foreign_keys`). `dotnet test` com a connection string real → 62/62
+aprovados (mesmo resultado dos testes com fakes/sem conexão). CRUD real
+validado via Playwright/Chromium contra a aplicação rodando com o banco
+real — 14/14 verificações: Categoria (criar raiz, criar filha com pai,
+renomear, alterar pai, autorreferência bloqueada — a UI nunca oferece a
+própria categoria como opção de pai), Tipo documental (criar, renomear),
+Documento sem revisão (criar, editar, catálogo mostra "Sem revisão"),
+Documento com revisões (adicionar `00`/`01`/`A`, todas listadas, nenhuma
+inferida como vigente). Screenshot do catálogo enviado ao usuário.
+
+**Achado não-crítico:** revisões no catálogo não preservam ordem de
+inserção (ordem física/PK do SQL Server, ex. `A, 01, 00`). Não viola
+BR-DSP-007 (que proíbe justamente inferir vigência pela ordem), mas é uma
+lacuna de UX — não corrigida nesta tarefa por exigir campo técnico
+(`CreatedAtUtc`) inexistente no schema; sugerida para a DEV-006.
+
+Container, senha temporária e connection string foram destruídos ao final;
+nada foi instalado permanentemente; `appsettings.Development.json`
+permanece inalterado, sem credenciais reais versionadas.
+
+### Testes finais (Etapa 7)
+`dotnet restore`/`build`/`test` (sem a variável de ambiente da conexão
+efêmera, refletindo o estado real do repositório) → 0 erros, 0 warnings,
+**62/62 testes aprovados** (52 unit + 10 integration).
+
+### Documentação (Etapa 8)
+`docs/handoff/OPEN_QUESTIONS.md`: Q-007 atualizada com nota de resolução
+integral (presença **e** integridade confirmadas), sem apagar o histórico
+da corrupção original. `docs/08-traceability/TRACEABILITY_MATRIX.md`:
+ressalva de corrupção convertida em nota histórica; nova seção
+descrevendo a validação real contra SQL Server efêmero.
+
+### PR #11
+Descrição atualizada com os resultados desta validação; **retirado de
+Draft** — documentos válidos, auditoria sem conflito, build/test verdes,
+migration aplicada com sucesso em SQL Server real, CRUD validado ponta a
+ponta. PR não foi mergeado (conforme instrução explícita).
+
+---
+
+## Histórico — DV2-SPRINT-002 (DV2-DEV-004 + DV2-DEV-005, sessão anterior)
 
 ## Parte 1 — Fechamento da DV2-DEV-004
 

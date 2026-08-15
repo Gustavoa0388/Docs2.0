@@ -1,4 +1,8 @@
+using DocsViewer.Application.Categories;
+using DocsViewer.Application.DocumentTypes;
+using DocsViewer.Application.Documents;
 using DocsViewer.Infrastructure.Persistence;
+using DocsViewer.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +24,10 @@ public static class InfrastructureServiceCollectionExtensions
                 options.UseSqlServer(connectionString);
             }
         });
+
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IDocumentTypeRepository, DocumentTypeRepository>();
+        services.AddScoped<IDocumentRepository, DocumentRepository>();
 
         return services;
     }

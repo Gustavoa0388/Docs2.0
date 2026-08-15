@@ -9,17 +9,17 @@ docs/
 ├── 00-product/          — visão de produto
 ├── 01-project/          — fundação e planejamento
 ├── 02-validation/       — estratégia e evidências de validação
-├── 03-requirements/      — especificação de requisitos do usuário (URS)
-├── 04-business-rules/    — regras de negócio (BRN)
-├── 05-risk/              — análise de riscos
-├── 06-design/            — arquitetura e design técnico
-├── 07-tests/             — planos e protocolos de teste
-├── 08-traceability/       — matriz de rastreabilidade
-├── decisions/            — Architecture Decision Records (ADRs)
-└── handoff/              — perguntas abertas e protocolo de desenvolvimento
+├── 03-requirements/     — especificação de requisitos do usuário (URS)
+├── 04-business-rules/   — regras de negócio (BRN)
+├── 05-risk/             — análise de riscos
+├── 06-design/           — arquitetura e design técnico
+├── 07-tests/            — planos e protocolos de teste
+├── 08-traceability/     — matriz de rastreabilidade
+├── decisions/           — Architecture Decision Records (ADRs)
+└── handoff/             — perguntas abertas e protocolo de desenvolvimento
 ```
 
-## Documentos oficiais em Draft já incorporados nesta atualização
+## Documentos oficiais vigentes em Draft
 
 | Documento | Versão | Arquivo |
 |---|---|---|
@@ -27,15 +27,10 @@ docs/
 | DV2-001 — Documento de Fundação | v0.4.2 Draft | `docs/01-project/DV2-001_Documento_de_Fundacao_v0.4.2_Draft.docx` |
 | DV2-PMP-001 — Plano Mestre do Projeto | v0.1 Draft | `docs/01-project/DV2-PMP-001_Plano_Mestre_do_Projeto_v0.1_Draft.docx` |
 | DV2-URS-001 — Especificação de Requisitos do Usuário | v0.3 Draft | `docs/03-requirements/DV2-URS-001_Especificacao_de_Requisitos_do_Usuario_v0.3_Draft.docx` |
+| DV2-BRN-001 — Especificação de Regras de Negócio | v0.2 Draft corrigido | `docs/04-business-rules/DV2-BRN-001_Especificacao_de_Regras_de_Negocio_v0.2_Draft_CORRIGIDO.docx` |
+| DV2-TRM-001 — Matriz preliminar URS ↔ BRN | v0.1 | `docs/08-traceability/DV2-TRM-001_Matriz_Preliminar_URS-BRN_v0.1.xlsx` |
 
-## Documentos ainda pendentes de incorporação binária
-
-| Documento | Versão | Destino |
-|---|---|---|
-| DV2-BRN-001 — Especificação de Regras de Negócio | v0.2 Draft corrigido | `docs/04-business-rules/` |
-| DV2-TRM-001 — Matriz preliminar URS ↔ BRN | v0.1 | `docs/08-traceability/` |
-
-Os dois arquivos acima existem no pacote documental controlado, mas ainda precisam ser transferidos ao GitHub. Portanto **Q-004/Q-007 ainda não devem ser encerradas por completo** até que os seis artefatos estejam presentes no repositório.
+Os seis artefatos acima constituem as referências documentais ativas do projeto enquanto não houver baseline ou revisão formal posterior. Versões Draft anteriores permanecem apenas como histórico e não devem orientar novas implementações quando houver conflito com a versão ativa.
 
 ## Documentos de metodologia existentes
 

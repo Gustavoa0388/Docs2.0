@@ -1,230 +1,341 @@
 # DEV_STATUS.md
 
 ## Estado geral
-DV2-DEV-004 concluída — primeira base do domínio documental implementada.
-Documentos oficiais (URS v0.3, BRN v0.2, etc.) **não** foram incorporados
-por não terem sido localizados — Q-004/Q-007 seguem abertas.
-
-## Branch atual
-feature/DV2-DEV-004-document-domain (a partir de `main`, com
-DV2-SPRINT-001 integrado: DV2-DEV-002, ADR-003/.NET 10, estrutura
-documental/rastreabilidade, DV2-DEV-003).
+DV2-DOC-003 (correção dos 4 documentos corrompidos) confirmada concluída e
+DV2-DEV-005 validada ponta a ponta contra SQL Server real (efêmero, via
+Docker). Os 6 documentos oficiais estão íntegros e legíveis em `main`; a
+auditoria da DEV-004/DEV-005 contra o texto real não encontrou divergências
+novas; PR #11 (DEV-005) atualizado e retirado de Draft.
 
 ## Tarefa atual
-DV2-DEV-004 — Domínio Documental Inicial do DocsViewer Omni.
+Fechamento DV2-DOC-003 + DV2-DEV-005 (continuação da DV2-SPRINT-002).
 
-## Pré-condições (confirmadas antes de iniciar)
-- `main` atualizada (`git pull`), DV2-SPRINT-001 integrado.
-- `net10.0` confirmado em todos os 6 projetos.
-- ADR-001, ADR-002, ADR-003 presentes em `docs/decisions/`.
-- `dotnet restore` e `dotnet build DocsViewer.sln` limpos antes de iniciar.
+## Branch atual
+`feature/DV2-DEV-005-document-registration` (rebaseada sobre `main` pós
+DV2-DOC-003, commit `507174a`).
 
-## Documentos oficiais — não incorporados
-Busca exaustiva realizada (sistema de arquivos local completo + Google
-Drive) pelos 6 arquivos oficiais (`DV2-000` v0.2, `DV2-001` v0.4.2,
-`DV2-PMP-001` v0.1, `DV2-URS-001` v0.3, `DV2-BRN-001` v0.2 corrigido,
-`DV2-TRM-001` v0.1) — **nenhum foi encontrado**. A branch
-`docs/DV2-DOC-002-official-drafts`, aparentemente destinada a recebê-los,
-está idêntica a `main` (nenhum arquivo enviado). Nenhum documento foi
-recriado de memória. Registrado como **Q-007** (nova). **Q-004
-permanece aberta.**
+## Resumo desta tarefa (DV2-DOC-003 + fechamento DEV-005)
 
-Como consequência, a seção de incorporação de documentos da tarefa ficou
-bloqueada, mas a implementação do domínio **não** ficou bloqueada, pois a
-própria tarefa forneceu as decisões de domínio aprovadas (DEC-DOM-001 a
-004) diretamente no texto — tratadas como fonte de verdade válida para
-esta tarefa específica, sem substituir o BRN formal.
+### Integridade documental (Etapa 1)
+Os 4 arquivos antes corrompidos (`DV2-000`, `DV2-001`, `DV2-PMP-001`,
+`DV2-URS-001` bruto) foram substituídos manualmente por versões íntegras em
+`main` (commit `507174a591f6ae247e756e10a6c04b2c26cdb60f`). Reverificação
+técnica (mesmos métodos da DV2-DEV-004: `file`, `python zipfile.ZipFile`,
+abertura via `python-docx`/`openpyxl`, confirmação de
+`word/document.xml`/`xl/workbook.xml`) confirmou os **6 documentos
+oficiais válidos, íntegros e legíveis**. Nenhum documento foi reconstruído
+de memória — apenas os arquivos já presentes no repositório foram lidos.
 
-READMEs de `docs/00-product/`, `01-project/`, `03-requirements/`,
-`04-business-rules/`, `08-traceability/` e `docs/README.md` atualizados
-apenas com as versões corretas agora conhecidas (ex.: URS é v0.3, não
-v0.2) e com o resultado da busca — sem declarar nenhum arquivo como
-presente.
+### Auditoria DEV-004/DEV-005 (Etapa 2)
+Extração completa de `DV2-URS-001 v0.3` (agora íntegro) e `DV2-001`
+(Fundação v0.4.2) confirmou: o texto de `DV2-URS-001` é **idêntico** ao já
+usado via `DV2-TRM-001` na revisão da DV2-DEV-004 (nenhuma divergência);
+`DV2-001` confirma explicitamente que a estratégia de tenancy/multi-
+organização permanece um "Ponto Aberto para Decisão" (seção 20) — validando
+retroativamente a decisão Q-008 de não introduzir `OrganizationId`; Document
+e Revisão permanecem conceitos distintos (10.1); DocsViewer não determina
+vigência (10.2); Category/DocumentType permanecem configuráveis (7.2).
+**Nenhuma divergência nova foi encontrada** entre o domínio implementado e
+os documentos agora completos. `DV2-000` e `DV2-PMP-001` são
+estratégicos/de governança, sem requisitos de domínio adicionais.
 
-## Q-006 — Composition Root
-**Encerrada.** `docs/ARCHITECTURE.md` atualizado: `Web -> Infrastructure`
-formalizado na lista de dependências, com nota explícita de que essa
-referência serve exclusivamente ao papel de Composition Root, e que
-continuam proibidas `Domain -> Infrastructure`, `Domain -> Web`,
-`Application -> Infrastructure`, `Application -> Web` e
-`Infrastructure -> Web`. Nenhum ADR adicional criado (não exigido pela
-estrutura documental existente).
+### Rebase da DEV-005 (Etapa 3)
+`feature/DV2-DEV-005-document-registration` rebaseada sobre `main`
+(commit `507174a`) sem conflitos — nenhum arquivo de documentação foi
+tocado pelos commits da DEV-005, então o rebase foi automático.
 
-## Entidades de domínio criadas
-Em `DocsViewer.Domain`:
-- `Documents/Document.cs` — identidade lógica; `Code` (negócio) distinto
-  de `Id` (técnico); pode existir sem `Revisions`.
-- `Documents/DocumentRevision.cs` — `RevisionIdentifier` como `string`
-  livre (não numérico obrigatório); não possui campo de vigência; nunca
-  inferida por `MAX()`.
-- `Documents/OfficialFile.cs` — hash (`HashValue`/`HashAlgorithm`) e
-  metadados de arquivo; `DocumentRevisionId` opcional; construtor valida
-  que a `DocumentRevision` informada pertence ao mesmo `Document`.
-- `Categories/Category.cs` — hierárquica, `ParentCategoryId` opcional,
-  sem limite de profundidade; impede auto-referência na criação e ao
-  reatribuir pai.
-- `DocumentTypes/DocumentType.cs` — classificação simples, independente
-  de `Category`, sem seed de valores fixos.
+### SQL Server efêmero e CRUD real (Etapas 4-6)
+`dockerd` (pré-instalado, não em execução) foi iniciado nesta sessão e um
+container `mcr.microsoft.com/mssql/server:2022-latest` efêmero foi criado
+com senha temporária gerada por sessão (nunca versionada). `dotnet ef
+database update` aplicou a migration `InitialDocumentDomain` do zero:
+5 tabelas de domínio confirmadas, 6 FKs todas `NO_ACTION`/Restrict, nenhuma
+coluna `OrganizationId` (consulta direta a `INFORMATION_SCHEMA`/
+`sys.foreign_keys`). `dotnet test` com a connection string real → 62/62
+aprovados (mesmo resultado dos testes com fakes/sem conexão). CRUD real
+validado via Playwright/Chromium contra a aplicação rodando com o banco
+real — 14/14 verificações: Categoria (criar raiz, criar filha com pai,
+renomear, alterar pai, autorreferência bloqueada — a UI nunca oferece a
+própria categoria como opção de pai), Tipo documental (criar, renomear),
+Documento sem revisão (criar, editar, catálogo mostra "Sem revisão"),
+Documento com revisões (adicionar `00`/`01`/`A`, todas listadas, nenhuma
+inferida como vigente). Screenshot do catálogo enviado ao usuário.
 
-Nenhum campo específico de cliente (Ortobio/Viman) foi criado.
+**Achado não-crítico:** revisões no catálogo não preservam ordem de
+inserção (ordem física/PK do SQL Server, ex. `A, 01, 00`). Não viola
+BR-DSP-007 (que proíbe justamente inferir vigência pela ordem), mas é uma
+lacuna de UX — não corrigida nesta tarefa por exigir campo técnico
+(`CreatedAtUtc`) inexistente no schema; sugerida para a DEV-006.
 
-## Invariantes implementadas (seção 15 da tarefa)
-- `Document` possui identidade técnica (`Id` `Guid`, não vazio) e código
-  obrigatório (`Code`).
-- `DocumentRevision` sempre pertence a um `Document` (`DocumentId`
-  obrigatório).
-- `OfficialFile` sempre pertence a um `Document` (`DocumentId`
-  obrigatório).
-- `OfficialFile.DocumentRevision`, quando informada, deve pertencer ao
-  mesmo `Document` do `OfficialFile` (`InvalidOperationException` caso
-  contrário).
-- `Category` não pode ter a si própria como pai (na criação e ao
-  reatribuir pai).
+Container, senha temporária e connection string foram destruídos ao final;
+nada foi instalado permanentemente; `appsettings.Development.json`
+permanece inalterado, sem credenciais reais versionadas.
 
-**Deliberadamente não implementado:** unicidade de `Document.Code`
-(nenhuma fonte documental confirma se deve ser único globalmente ou por
-organização — ver Q-008); qualquer limite de tamanho/comprimento de
-string (nenhuma fonte documental os define); estados de disponibilização
-(ver seção "Disponibilização" abaixo).
+### Testes finais (Etapa 7)
+`dotnet restore`/`build`/`test` (sem a variável de ambiente da conexão
+efêmera, refletindo o estado real do repositório) → 0 erros, 0 warnings,
+**62/62 testes aprovados** (52 unit + 10 integration).
 
-## Configurações EF Core
-Em `DocsViewer.Infrastructure/Persistence/Configurations/` (uma classe
-`IEntityTypeConfiguration<T>` por entidade, aplicadas via
-`ApplyConfigurationsFromAssembly`):
-- Todas as chaves primárias `Guid` com `ValueGeneratedNever()` (geradas
-  em código, não pelo banco).
-- `Document -> Category` e `Document -> DocumentType`: FK opcional,
-  `DeleteBehavior.Restrict`.
-- `DocumentRevision -> Document`: FK obrigatória, `Restrict`.
-- `OfficialFile -> Document`: FK obrigatória, `Restrict`.
-- `OfficialFile -> DocumentRevision`: FK opcional, `Restrict`.
-- `Category -> Category` (pai): FK opcional, `Restrict`.
-- **Nenhum cascade delete em nenhuma relação** — comportamento
-  conservador de exclusão em toda a árvore Document → Revision →
-  OfficialFile e nas demais relações, não só na cadeia citada
-  explicitamente na tarefa.
-- Domain permanece sem qualquer dependência de EF Core; toda configuração
-  fica em Infrastructure.
+### Documentação (Etapa 8)
+`docs/handoff/OPEN_QUESTIONS.md`: Q-007 atualizada com nota de resolução
+integral (presença **e** integridade confirmadas), sem apagar o histórico
+da corrupção original. `docs/08-traceability/TRACEABILITY_MATRIX.md`:
+ressalva de corrupção convertida em nota histórica; nova seção
+descrevendo a validação real contra SQL Server efêmero.
 
-## Migration
-`InitialDocumentDomain`
-(`DocsViewer.Infrastructure/Persistence/Migrations/`), criada com
-`dotnet ef migrations add` e **inspecionada antes de aceitar**:
-- 5 tabelas: `Categories`, `DocumentTypes`, `Documents`,
-  `DocumentRevisions`, `OfficialFiles`.
-- Todas as FKs geradas como `ON DELETE NO ACTION` (script SQL gerado e
-  revisado com `dotnet ef migrations script`).
-- 6 índices, um por coluna de FK.
-- Nenhuma tabela fictícia. Nenhuma migration foi aplicada contra um banco
-  real (ambiente sem SQL Server disponível) — apenas gerada e
-  inspecionada (arquivos de migration + script SQL).
+### PR #11
+Descrição atualizada com os resultados desta validação; **retirado de
+Draft** — documentos válidos, auditoria sem conflito, build/test verdes,
+migration aplicada com sucesso em SQL Server real, CRUD validado ponta a
+ponta. PR não foi mergeado (conforme instrução explícita).
 
-## Testes unitários (`DocsViewer.UnitTests`)
-20 testes, 20 aprovados, cobrindo (entre outros) exatamente os cenários
-pedidos na seção 18: Documento sem Revisão é válido; Documento pode
-possuir Revisão; identificador de Revisão não numérico (`00`, `01`, `A`,
-`B`, `C1`); OfficialFile sem Revisão; OfficialFile com Revisão de outro
-Document é inválido; Category raiz; Category com pai; Category não pode
-ser pai de si mesma (na criação e ao reatribuir). Nenhum teste de
-getter/setter trivial.
+---
 
-## Testes de integração (`DocsViewer.IntegrationTests`)
-10 testes, 10 aprovados (4 já existentes da DV2-DEV-003 + 6 novos). Os
-novos testam o **modelo EF Core construído pelo provider real do SQL
-Server** (chaves, FKs, obrigatoriedade, `DeleteBehavior.Restrict`, ausência
-de cascade), sem abrir nenhuma conexão de banco — não foi usado um
-provider diferente (InMemory/SQLite) para não dar falsa confiança sobre
-comportamento específico do SQL Server. Nenhum teste exigiu banco real
-não executável nesta tarefa.
+## Histórico — DV2-SPRINT-002 (DV2-DEV-004 + DV2-DEV-005, sessão anterior)
 
-## Resultado de restore
-`dotnet restore DocsViewer.sln` — sem erros.
+## Parte 1 — Fechamento da DV2-DEV-004
 
-## Resultado de build
-`dotnet build DocsViewer.sln` — Build succeeded, **0 Warning(s), 0
-Error(s)**.
+### Documentos oficiais — presentes, com ressalva de integridade
+Os 6 documentos oficiais estão fisicamente presentes em `main` desde a
+DV2-DOC-002. Verificação técnica (comando `file`, hexdump, `python
+zipfile.ZipFile`) confirmou que **4 dos 6 arquivos estão corrompidos**:
+`DV2-000_Product_Vision_v0.2_Draft.docx`,
+`DV2-001_Documento_de_Fundacao_v0.4.2_Draft.docx`,
+`DV2-PMP-001_Plano_Mestre_do_Projeto_v0.1_Draft.docx` e o `.docx` bruto de
+`DV2-URS-001` não são ZIP/OOXML válidos. Apenas `DV2-BRN-001.docx` e
+`DV2-TRM-001.xlsx` são íntegros — usados como fonte real para a revisão
+documental (`DV2-TRM-001` contém o texto completo dos 232 requisitos URS).
+Registrado em detalhe na **Q-007**.
 
-## Resultado de test
-`dotnet test DocsViewer.sln` — **30 testes, 30 aprovados, 0 falhas**
-(20 UnitTests + 10 IntegrationTests).
+### Revisão documental (Etapa 2 da DV2-SPRINT-002)
+Revisão de `Document`, `DocumentRevision`, `OfficialFile`, `Category`,
+`DocumentType` contra `DV2-BRN-001`/`DV2-TRM-001` encontrou uma lacuna real:
+`Document` não possuía `Title`, exigido por `URS-UX-002`/`URS-VWR-013`.
+Corrigido: `Title` adicionado à entidade, ao mapeamento EF
+(`DocumentConfiguration`), aos testes, e a migration `InitialDocumentDomain`
+foi regenerada. Nenhuma outra divergência de domínio foi encontrada — o
+restante do modelo (separação Document/Revision, `OfficialFile` com revisão
+opcional, `RevisionIdentifier` livre, ausência de vigência,
+`DeleteBehavior.Restrict` uniforme) está alinhado com `BR-DOC-*`, `BR-REV-*`
+e `BR-DSP-*`.
 
-## Resultado da execução
-`dotnet run --project DocsViewer.Web` — aplicação sobe sem exceções após
-a introdução do domínio e do EF Core; Interactive Server e navegação
-revalidados via navegador headless (Chromium/Playwright), sem erros de
-console; `/`, `/documentos`, `/favoritos`, `/solicitacoes`,
-`/administracao` → 200. Dashboard (DV2-DEV-002) inalterado. Nenhum CRUD
-do domínio foi exposto na UI (fora de escopo desta tarefa).
+### Questões encerradas
+- **Q-006:** `Web -> Infrastructure` formalizado como Composition Root em
+  `docs/ARCHITECTURE.md`. Resolvida.
+- **Q-007:** documentos presentes no repositório desde a DV2-DOC-002 —
+  resolvida quanto à presença. Ressalva de corrupção de 4 arquivos
+  permanece como pendência distinta (recomendada tarefa `DV2-DOC-003`).
+- **Q-008:** `OrganizationId` não introduzido nesta fase — configurabilidade
+  por organização não é multi-tenancy; tenancy será decidida futuramente.
+  Nenhuma migration de Organization criada. Resolvida.
+- **Q-009:** disponibilização não modelada na DEV-004; modelagem funcional
+  transferida formalmente à DEV-005 (que também não a implementou — ver
+  `docs/handoff/DV2-DSP-001-PROPOSAL.md`). Resolvida para o escopo da
+  DEV-004.
 
-## Rastreabilidade
-`docs/08-traceability/TRACEABILITY_MATRIX.md` atualizada:
-- Tabela de requisito/regra formais (URS/BRN) permanece vazia — ainda
-  sem documentos oficiais.
-- Nova tabela "Cobertura real da DV2-DEV-004" vinculando cada
-  `DEC-DOM-XXX` (e demais invariantes) a componente, arquivo de código e
-  teste, com status Coberto/Parcialmente coberto/Ainda não implementado
-  — sem fingir cobertura formal de URS/BRN.
-- Disponibilização e Organização/multi-tenancy marcados explicitamente
-  como "Ainda não implementado", com referência às questões abertas.
+Ver `docs/handoff/OPEN_QUESTIONS.md` para o texto completo de cada decisão
+(histórico de Q-001 a Q-005 preservado, nada apagado).
 
-## Decisões tomadas
-- IDs técnicos: `Guid`, gerados em código (`ValueGeneratedNever()`),
-  distintos do código documental (`Document.Code`) — não há ADR/BRN
-  definindo estratégia de ID; escolha justificada como decisão técnica
-  de scaffolding, não regra de negócio.
-- Nenhum limite de tamanho/formato de string foi definido em nenhuma
-  entidade — ausência de fonte documental para tais limites.
-- `Document.Code` não foi tornado único (nem globalmente nem por escopo)
-  — sem fonte documental que defina o escopo de unicidade, e criar essa
-  restrição agora poderia colidir com uma futura modelagem de
-  Organização (Q-008).
-- `DeleteBehavior.Restrict` aplicado uniformemente em todas as FKs do
-  domínio documental (não só na cadeia Document→Revision→OfficialFile
-  citada na tarefa), pelo mesmo princípio de exclusão conservadora.
-- `Web -> Infrastructure` formalizado em `docs/ARCHITECTURE.md` (Q-006
-  encerrada), sem ADR adicional.
+### Rebase e integração
+`feature/DV2-DEV-004-document-domain` rebaseada sobre a `main`
+pós-DV2-DOC-002. Conflitos em 7 arquivos de documentação resolvidos
+tomando a versão de `main` como autoritativa (instrução explícita da
+tarefa); nenhuma alteração de código de domínio foi perdida. PR #9
+atualizado e **mergeado em `main`** (commit `840333d`).
 
-## Assumptions
-- Estratégia de identificador técnico (`Guid`) — ver "Decisões tomadas".
-- Nenhuma outra assumption além das já documentadas.
+### Rastreabilidade real
+`docs/08-traceability/TRACEABILITY_MATRIX.md` reescrita com vínculos reais
+`URS-*` ↔ `BR-*` ↔ componente ↔ código ↔ teste, classificando cada item
+como Coberto / Parcialmente coberto / Não implementado / Não aplicável —
+substituindo a tabela anterior baseada apenas em `DEC-DOM-*`.
+
+### Build/test/run pós-rebase
+`dotnet build` → 0 erros, 0 warnings. `dotnet test` → 31/31 (21 unit + 10
+integration). `dotnet run --project DocsViewer.Web` validado via curl:
+`/`, `/documentos`, `/administracao` → HTTP 200, sem exceções no log.
+
+## Parte 2 — DV2-DEV-005 (cadastro documental inicial)
+
+### Domínio (ajustes mínimos para suportar os casos de uso)
+Adicionados a `Document` (sem alterar schema): `AddRevision(DocumentRevision)`
+(reforça que a revisão pertence ao mesmo `Document`, mesmo padrão de
+`OfficialFile`), `UpdateTitle(string)`, `SetCategory(Guid?)`,
+`SetDocumentType(Guid?)`. `Category`/`DocumentType` já possuíam `Rename`/
+`SetParent` da DEV-004 — reaproveitados sem alteração.
+
+### Application (`DocsViewer.Application`)
+Um repositório específico por agregado (sem Repository genérico universal):
+`ICategoryRepository`, `IDocumentTypeRepository`, `IDocumentRepository`.
+Serviços de caso de uso: `CategoryService` (criar, listar, renomear,
+definir/alterar pai — autorreferência barrada pelo domínio, pai inexistente
+barrado pelo serviço), `DocumentTypeService` (criar, listar, renomear),
+`DocumentService` (criar, listar, consultar, editar título/categoria/tipo —
+valida que categoria/tipo informados existem), `DocumentRevisionService`
+(adicionar revisão a um Document existente). Documento sem nenhuma revisão
+é estado válido em todos os fluxos — nenhuma "Rev.00" é criada
+automaticamente, nenhuma revisão é inferida como "atual".
+`ApplicationServiceCollectionExtensions.AddApplication()` registra os 4
+serviços como `Scoped`.
+
+### Infrastructure (persistência)
+`CategoryRepository`, `DocumentTypeRepository`, `DocumentRepository` em
+`DocsViewer.Infrastructure/Persistence/Repositories/`, implementando as
+interfaces de Application via `DocsViewerDbContext` (EF Core já existente
+da DEV-004, sem alteração de schema/migration). Registrados em
+`InfrastructureServiceCollectionExtensions.AddInfrastructure(...)`.
+`DbContext` nunca é referenciado diretamente por componentes Razor — Web
+depende apenas de Application (serviços) e de Infrastructure exclusivamente
+como Composition Root (`Program.cs`), preservando a regra formalizada na
+Q-006.
+
+### Banco de desenvolvimento
+Nenhum SQL Server disponível neste ambiente: não há instância local, e o
+daemon Docker (`dockerd`) não está em execução — não foi iniciado nem
+instalado nada para contornar isso, por instrução explícita da tarefa.
+`appsettings.Development.json` mantém a connection string já existente
+(`Server=localhost,1433;...`), sem credenciais reais versionadas. Quando
+houver ambiente com SQL Server: `dotnet ef database update --project
+DocsViewer.Infrastructure --startup-project DocsViewer.Web` aplica a
+migration `InitialDocumentDomain` (a única existente, sem alteração nesta
+tarefa) e a aplicação passa a funcionar normalmente.
+
+### UI Blazor (Interactive Server, layout/identidade existentes)
+- `Administracao/AdministracaoIndex.razor` (`/administracao`) — substitui a
+  página "não implementada" por um índice com links para Categorias e
+  Tipos documentais.
+- `Administracao/Categorias.razor` (`/administracao/categorias`) — lista,
+  formulário "Nova categoria" (nome + categoria pai opcional), edição
+  inline (nome + pai).
+- `Administracao/TiposDocumentais.razor` (`/administracao/tipos-documentais`)
+  — lista, criar, editar (nome).
+- `Documentos/Documentos.razor` (`/documentos`) — substitui a página "não
+  implementada" por catálogo funcional: Código, Título, Categoria, Tipo,
+  revisões (lista de identificadores ou "Sem revisão").
+- `Documentos/NovoDocumento.razor` (`/documentos/novo`) — formulário com
+  código, título, categoria opcional, tipo documental opcional.
+- `Documentos/DocumentoDetalhe.razor` (`/documentos/{Id:guid}`) — edição de
+  metadados (título/categoria/tipo), lista de revisões, formulário
+  "Adicionar revisão" (identificador livre).
+
+Nenhum campo específico de implantação (Ortobio/Viman) foi criado. CSS
+adicionado a `wwwroot/app.css` reaproveita as variáveis de cor já
+existentes (`--color-primary`, etc.) e o padrão visual dos cards do
+dashboard — sem copiar a interface do repositório Demo.
+
+### Disponibilização (Etapa 18)
+**Não implementada nesta tarefa**, por instrução explícita. `DV2-BRN-001`
+(seção 6, BR-DSP-001 a 009) descreve o comportamento esperado mas não fixa
+nomes de estado, transições nem cardinalidade — por isso, em vez de um
+enum improvisado, foi registrada uma proposta:
+`docs/handoff/DV2-DSP-001-PROPOSAL.md`, com terminologia derivada do BRN
+real (Incorporado / Em conferência / Disponibilizado para uso corrente /
+Retirado do uso operacional / Histórico) e os pontos que permanecem em
+aberto.
+
+### Validações
+Apenas regras conhecidas: campos obrigatórios já validados pelo domínio
+(`Code`, `Title`, `Name`), e checagem de existência de `Category`/
+`DocumentType`/`Document` referenciados (integridade referencial, não regra
+de negócio inventada). Nenhum tamanho máximo, padrão alfanumérico,
+obrigatoriedade de revisão ou unicidade global foi inventado — todos
+permanecem deliberadamente ausentes por falta de fonte documental (mesma
+decisão já registrada na DEV-004).
+
+### Testes
+31 testes herdados da DEV-004 (após rebase/merge) + testes novos desta
+tarefa:
+- **Domain:** `AddRevision_Vincula_Revisao_Do_Mesmo_Document`,
+  `AddRevision_De_Outro_Document_E_Invalido`, `UpdateTitle_*`,
+  `SetCategory_E_SetDocumentType_Aceitam_Nulo` em `DocumentTests.cs`.
+- **Application** (`DocsViewer.UnitTests/Application/**`, usando
+  repositórios em memória em `TestDoubles/Fake*Repository.cs` — não usa EF
+  Core InMemory/SQLite, preservando a mesma cautela da DEV-004 sobre não
+  substituir o provider real do SQL Server nos testes que o exigem):
+  `CategoryServiceTests` (criar raiz, criar com pai, pai inexistente,
+  renomear, autorreferência rejeitada, alterar pai, listar vazio),
+  `DocumentTypeServiceTests` (criar, listar, renomear, renomear inexistente),
+  `DocumentServiceTests` (criar sem/com categoria e tipo, categoria/tipo
+  inexistentes, atualizar metadados, atualizar documento inexistente,
+  listar), `DocumentRevisionServiceTests` (identificadores `00`, `01`, `A`,
+  `B`, `C1` como texto livre, revisão vincula ao documento, documento
+  inexistente, **documento sem nenhuma revisão adicionada permanece
+  válido**).
+
+**Total: 52 testes unitários + 10 testes de integração, 62 aprovados, 0
+falhas.** Nenhum teste artificial de getter/setter.
+
+### Build/test/run
+`dotnet build DocsViewer.sln` → 0 erros, 0 warnings. `dotnet test
+DocsViewer.sln` → 62/62 aprovados. `dotnet run --project DocsViewer.Web`:
+`/` e `/administracao` (sem consulta a banco) → HTTP 200; `/documentos`,
+`/documentos/novo`, `/administracao/categorias`,
+`/administracao/tipos-documentais`, `/documentos/{id}` → HTTP 500 nesta
+execução, com `SqlException` de conectividade (SQL Server indisponível
+neste ambiente) — confirmado no log da aplicação que a causa é
+exclusivamente de infraestrutura, não um defeito de código. CRUD real fim
+a fim não foi validado contra banco real nesta tarefa (ver "Riscos"
+abaixo).
+
+### Rastreabilidade
+`docs/08-traceability/TRACEABILITY_MATRIX.md` atualizada: linhas
+anteriormente "Parcialmente coberto — UI é escopo da DEV-005" promovidas
+para "Coberto" onde a funcionalidade foi de fato entregue (cadastro de
+Document, administração de Category/DocumentType, listagem/adição de
+Revision), nova seção "DV2-DEV-005 — Application, persistência e UI"
+detalhando caso de uso → componente → repositório → página → teste.
+
+## Decisões tomadas (DV2-SPRINT-002)
+- Um repositório específico por agregado (`ICategoryRepository`,
+  `IDocumentTypeRepository`, `IDocumentRepository`), sem Repository
+  genérico universal — decisão técnica de escopo, não regra de negócio.
+- Resolução de nomes de Category/DocumentType para exibição no catálogo de
+  Documentos feita na página Blazor (dicionário `Guid -> string` montado a
+  partir de `CategoryService`/`DocumentTypeService`), não por navegação EF
+  adicional em `Document` — evita reabrir o modelo de domínio já revisado
+  e mergeado na DEV-004.
+- Testes de Application usam repositórios em memória (fakes), não EF Core
+  InMemory/SQLite — mantém a mesma cautela da DEV-004 de não substituir o
+  provider real do SQL Server nos testes que dependem dele.
+- Disponibilização registrada como proposta (`DV2-DSP-001-PROPOSAL.md`),
+  não implementada — ver Etapa 18.
 
 ## Riscos
-- **Q-004/Q-007:** documentos oficiais (URS v0.3, BRN v0.2, Product
-  Vision, Documento de Fundação, PMP, TRM) seguem ausentes do
-  repositório — qualquer regra de negócio real implementada antes deles
-  chegarem corre risco de precisar ser revista.
-- **Q-008 (nova):** `OrganizationId` não modelado (Organization não
-  especificada formalmente) — modelo atual assume implicitamente escopo
-  único; migration adicional será necessária quando isso for resolvido.
-- **Q-009 (nova):** nenhum estado de disponibilização foi modelado
-  (deliberadamente, conforme instruído) — funcionalidades futuras que
-  dependam disso (ex.: tela de Documentos) ficam bloqueadas até decisão.
-- Risco já conhecido: Q-003 (.NET 8 vs 10) já resolvida; nenhum risco
-  novo relacionado a framework nesta tarefa.
+- **Corrupção documental (Q-007):** `DV2-000`, `DV2-001`, `DV2-PMP-001` e o
+  `.docx` de `DV2-URS-001` continuam corrompidos — qualquer requisito que
+  dependa exclusivamente deles permanece inacessível. Recomendada tarefa
+  `DV2-DOC-003` dedicada a corrigir os arquivos.
+- **Ausência de SQL Server neste ambiente:** CRUD real fim a fim
+  (criar/listar/editar Category, DocumentType, Document, Revision contra
+  banco real) não foi validado nesta tarefa — apenas via testes com
+  repositórios em memória/EF Core model tests e smoke test HTTP. Deve ser
+  validado manualmente assim que houver ambiente com SQL Server disponível
+  (aplicar `InitialDocumentDomain` e repetir os fluxos da Etapa 23).
+- **Disponibilização (Q-009 → DV2-DSP-001-PROPOSAL):** ainda sem estado
+  interno modelado; funcionalidades que dependam de "revisão vigente"
+  continuam bloqueadas até decisão humana sobre a proposta.
+- **`Document.Code` sem unicidade:** permanece sem imposição de unicidade
+  (mesma razão da DEV-004 — sem escopo de organização definido, Q-008).
 
-## Itens deliberadamente não implementados (fora de escopo, seção 25)
-CRUD completo de interface; autenticação; usuários; perfis; permissões;
-Audit Trail funcional; upload físico; armazenamento real de PDF (sem
-BLOB); PDF Viewer; OCR; impressão; download; marca d'água; scanner;
-shells; APK Android; integração Viman. Também não implementados por
-decisão explícita da própria tarefa: estados de disponibilização (Q-009);
-`OrganizationId`/multi-tenancy (Q-008); unicidade de `Document.Code`.
+## Itens deliberadamente não implementados (fora de escopo da DEV-005)
+Armazenamento físico/upload de PDF; autenticação; usuários; perfis;
+permissões reais; Audit Trail; PDF Viewer; OCR; marca d'água; impressão;
+download; scanner; clientes-shell; APK; integração Viman; estados de
+disponibilização/vigência (ver proposta).
 
 ## Pendências
-- Q-004, Q-007: localizar e incorporar os 6 documentos oficiais.
-- Q-008: especificação formal de `Organization` e `OrganizationId`.
-- Q-009: estados de disponibilização do DocsViewer.
-- Migration `InitialDocumentDomain` nunca foi aplicada a um banco real
-  (sem SQL Server disponível neste ambiente) — aplicar e validar quando
-  houver ambiente com banco disponível.
+- Q-007 (corrupção documental): abrir `DV2-DOC-003` para corrigir os 4
+  arquivos `.docx` inválidos.
+- Validar CRUD real da DEV-005 contra SQL Server assim que disponível.
+- Decisão humana sobre `DV2-DSP-001-PROPOSAL.md` antes de modelar
+  disponibilização em produção.
+- Migration `InitialDocumentDomain` segue nunca aplicada a um banco real.
 
-## Próximo passo sugerido
-1. Localizar e incorporar o pacote documental oficial (Q-004/Q-007) —
-   bloqueia rastreabilidade formal e qualquer regra de negócio adicional
-   confiável.
-2. Decidir Q-008 (Organization/multi-tenancy) e Q-009 (disponibilização)
-   antes de expandir o domínio documental além desta fundação.
-3. Revisar/mergear o PR desta tarefa.
-4. Só então avançar para funcionalidade que dependa de CRUD real do
-   domínio (ex.: cadastro de Category/DocumentType, primeira tela de
-   Documentos), conforme ROADMAP.md — Fase 2.
+## Próximo passo sugerido (DEV-006)
+1. Resolver a pendência de infraestrutura (SQL Server) e validar o CRUD
+   completo da DEV-005 ponta a ponta.
+2. Levar `DV2-DSP-001-PROPOSAL.md` para decisão humana e, se aprovada,
+   modelar disponibilização (estado, transições, permissões associadas).
+3. Iniciar armazenamento físico real de `OfficialFile` (upload, hash,
+   repositório/NAS) — ainda fora de escopo em todas as tarefas até aqui.
+4. Considerar corrigir os documentos oficiais corrompidos (`DV2-DOC-003`)
+   antes de expandir ainda mais regras de negócio sobre fontes parciais.

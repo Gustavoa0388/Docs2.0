@@ -1,0 +1,105 @@
+@page "/documentos/novo"
+@rendermode InteractiveServer
+@using DocsViewer.Application.Categories
+@using DocsViewer.Application.DocumentTypes
+@using DocsViewer.Application.Documents
+@using DocsViewer.Domain.Categories
+@using DocsViewer.Domain.DocumentTypes
+@inject DocumentService DocumentService
+@inject CategoryService CategoryService
+@inject DocumentTypeService DocumentTypeService
+@inject NavigationManager Navigation
+
+<PageTitle>Novo documento — DocsViewer Omni</PageTitle>
+
+<section class="admin-page">
+    <h1>Novo documento</h1>
+    <p class="admin-page__subtitle">Categoria e tipo documental são opcionais. Nenhuma revisão é criada automaticamente.</p>
+
+    @if (_errorMessage is not null)
+    {
+        <p class="form-error">@_errorMessage</p>
+    }
+
+    <div class="admin-panel">
+        <EditForm Model="_model" OnValidSubmit="CreateAsync" FormName="new-document">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <label for="doc-code">Código</label>
+                <InputText id="doc-code" @bind-Value="_model.Code" />
+            </div>
+            <div class="form-row">
+                <label for="doc-title">Título</label>
+                <InputText id="doc-title" @bind-Value="_model.Title" />
+            </div>
+            <div class="form-row">
+                <label for="doc-category">Categoria</label>
+                <select id="doc-category" @bind="_model.CategoryId">
+                    <option value="">(nenhuma)</option>
+                    @foreach (var category in _categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="doc-type">Tipo documental</label>
+                <select id="doc-type" @bind="_model.DocumentTypeId">
+                    <option value="">(nenhum)</option>
+                    @foreach (var documentType in _documentTypes)
+                    {
+                        <option value="@documentType.Id">@documentType.Name</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn--primary">Criar documento</button>
+        </EditForm>
+    </div>
+</section>
+
+@code {
+    private List<Category> _categories = new();
+    private List<DocumentType> _documentTypes = new();
+    private NewDocumentModel _model = new();
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var categories = await CategoryService.ListAsync();
+        _categories = categories.ToList();
+
+        var documentTypes = await DocumentTypeService.ListAsync();
+        _documentTypes = documentTypes.ToList();
+    }
+
+    private async Task CreateAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            Guid? categoryId = string.IsNullOrWhiteSpace(_model.CategoryId) ? null : Guid.Parse(_model.CategoryId);
+            Guid? documentTypeId = string.IsNullOrWhiteSpace(_model.DocumentTypeId) ? null : Guid.Parse(_model.DocumentTypeId);
+
+            var document = await DocumentService.CreateAsync(_model.Code, _model.Title, categoryId, documentTypeId);
+
+            Navigation.NavigateTo($"documentos/{document.Id}");
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private sealed class NewDocumentModel
+    {
+        public string Code { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string CategoryId { get; set; } = string.Empty;
+        public string DocumentTypeId { get; set; } = string.Empty;
+    }
+}

@@ -1,3 +1,4 @@
+using DocsViewer.Application.DependencyInjection;
 using DocsViewer.Infrastructure.DependencyInjection;
 using DocsViewer.Web.Components;
 
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();

@@ -1,0 +1,144 @@
+@page "/administracao/tipos-documentais"
+@rendermode InteractiveServer
+@using DocsViewer.Application.DocumentTypes
+@using DocsViewer.Domain.DocumentTypes
+@inject DocumentTypeService DocumentTypeService
+
+<PageTitle>Tipos documentais — DocsViewer Omni</PageTitle>
+
+<section class="admin-page">
+    <h1>Tipos documentais</h1>
+    <p class="admin-page__subtitle">Tipos documentais configuráveis pela implantação — nenhum tipo é fixado pelo produto.</p>
+
+    @if (_errorMessage is not null)
+    {
+        <p class="form-error">@_errorMessage</p>
+    }
+
+    <div class="admin-panel">
+        <h2 class="admin-panel__title">Novo tipo documental</h2>
+        <EditForm Model="_newDocumentType" OnValidSubmit="CreateAsync" FormName="new-document-type">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <label for="new-doctype-name">Nome</label>
+                <InputText id="new-doctype-name" @bind-Value="_newDocumentType.Name" />
+            </div>
+            <button type="submit" class="btn btn--primary">Novo tipo documental</button>
+        </EditForm>
+    </div>
+
+    <div class="admin-panel">
+        <h2 class="admin-panel__title">Tipos documentais cadastrados</h2>
+
+        @if (_documentTypes.Count == 0)
+        {
+            <p class="admin-panel__empty">Nenhum tipo documental cadastrado.</p>
+        }
+        else
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var documentType in _documentTypes)
+                    {
+                        @if (_editingId == documentType.Id)
+                        {
+                            <tr>
+                                <td><InputText @bind-Value="_editName" /></td>
+                                <td>
+                                    <button class="btn btn--small btn--primary" @onclick="() => SaveEditAsync(documentType.Id)">Salvar</button>
+                                    <button class="btn btn--small" @onclick="CancelEdit">Cancelar</button>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td>@documentType.Name</td>
+                                <td>
+                                    <button class="btn btn--small" @onclick="() => StartEdit(documentType)">Editar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>
+
+@code {
+    private List<DocumentType> _documentTypes = new();
+    private NewDocumentTypeModel _newDocumentType = new();
+    private string? _errorMessage;
+
+    private Guid? _editingId;
+    private string _editName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync()
+    {
+        var documentTypes = await DocumentTypeService.ListAsync();
+        _documentTypes = documentTypes.ToList();
+    }
+
+    private async Task CreateAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            await DocumentTypeService.CreateAsync(_newDocumentType.Name);
+
+            _newDocumentType = new NewDocumentTypeModel();
+            await ReloadAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private void StartEdit(DocumentType documentType)
+    {
+        _errorMessage = null;
+        _editingId = documentType.Id;
+        _editName = documentType.Name;
+    }
+
+    private void CancelEdit()
+    {
+        _editingId = null;
+    }
+
+    private async Task SaveEditAsync(Guid id)
+    {
+        _errorMessage = null;
+
+        try
+        {
+            await DocumentTypeService.RenameAsync(id, _editName);
+
+            _editingId = null;
+            await ReloadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private sealed class NewDocumentTypeModel
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+}

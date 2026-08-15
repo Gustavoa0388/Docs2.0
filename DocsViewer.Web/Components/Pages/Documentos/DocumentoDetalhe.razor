@@ -1,0 +1,198 @@
+@page "/documentos/{Id:guid}"
+@rendermode InteractiveServer
+@using DocsViewer.Application.Categories
+@using DocsViewer.Application.DocumentTypes
+@using DocsViewer.Application.Documents
+@using DocsViewer.Domain.Categories
+@using DocsViewer.Domain.DocumentTypes
+@using DocsViewer.Domain.Documents
+@inject DocumentService DocumentService
+@inject DocumentRevisionService DocumentRevisionService
+@inject CategoryService CategoryService
+@inject DocumentTypeService DocumentTypeService
+
+<PageTitle>@(_document?.Code ?? "Documento") — DocsViewer Omni</PageTitle>
+
+@if (_notFound)
+{
+    <p class="form-error">Documento não encontrado.</p>
+}
+else if (_document is not null)
+{
+    <section class="admin-page">
+        <h1>@_document.Code — @_document.Title</h1>
+
+        @if (_errorMessage is not null)
+        {
+            <p class="form-error">@_errorMessage</p>
+        }
+
+        <div class="admin-panel">
+            <h2 class="admin-panel__title">Metadados</h2>
+            <EditForm Model="_editModel" OnValidSubmit="SaveMetadataAsync" FormName="edit-document">
+                <DataAnnotationsValidator />
+                <div class="form-row">
+                    <label for="doc-title">Título</label>
+                    <InputText id="doc-title" @bind-Value="_editModel.Title" />
+                </div>
+                <div class="form-row">
+                    <label for="doc-category">Categoria</label>
+                    <select id="doc-category" @bind="_editModel.CategoryId">
+                        <option value="">(nenhuma)</option>
+                        @foreach (var category in _categories)
+                        {
+                            <option value="@category.Id">@category.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="doc-type">Tipo documental</label>
+                    <select id="doc-type" @bind="_editModel.DocumentTypeId">
+                        <option value="">(nenhum)</option>
+                        @foreach (var documentType in _documentTypes)
+                        {
+                            <option value="@documentType.Id">@documentType.Name</option>
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="btn btn--primary">Salvar metadados</button>
+            </EditForm>
+        </div>
+
+        <div class="admin-panel">
+            <h2 class="admin-panel__title">Revisões</h2>
+
+            @if (_document.Revisions.Count == 0)
+            {
+                <p class="admin-panel__empty">Este documento não possui revisão registrada. Isso é válido — nem todo documento é controlado por revisão.</p>
+            }
+            else
+            {
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Identificador da revisão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var revision in _document.Revisions)
+                        {
+                            <tr>
+                                <td>@revision.RevisionIdentifier</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+
+            <h3 class="admin-panel__subtitle">Adicionar revisão</h3>
+            <EditForm Model="_newRevision" OnValidSubmit="AddRevisionAsync" FormName="new-revision">
+                <DataAnnotationsValidator />
+                <div class="form-row">
+                    <label for="revision-identifier">Identificador (ex.: 00, 01, A, B, C1)</label>
+                    <InputText id="revision-identifier" @bind-Value="_newRevision.RevisionIdentifier" />
+                </div>
+                <button type="submit" class="btn btn--primary">Adicionar revisão</button>
+            </EditForm>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private Document? _document;
+    private bool _notFound;
+    private string? _errorMessage;
+
+    private List<Category> _categories = new();
+    private List<DocumentType> _documentTypes = new();
+    private EditDocumentModel _editModel = new();
+    private NewRevisionModel _newRevision = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var categories = await CategoryService.ListAsync();
+        _categories = categories.ToList();
+
+        var documentTypes = await DocumentTypeService.ListAsync();
+        _documentTypes = documentTypes.ToList();
+
+        await LoadDocumentAsync();
+    }
+
+    private async Task LoadDocumentAsync()
+    {
+        _document = await DocumentService.GetByIdAsync(Id);
+
+        if (_document is null)
+        {
+            _notFound = true;
+            return;
+        }
+
+        _editModel = new EditDocumentModel
+        {
+            Title = _document.Title,
+            CategoryId = _document.CategoryId?.ToString() ?? string.Empty,
+            DocumentTypeId = _document.DocumentTypeId?.ToString() ?? string.Empty,
+        };
+    }
+
+    private async Task SaveMetadataAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            Guid? categoryId = string.IsNullOrWhiteSpace(_editModel.CategoryId) ? null : Guid.Parse(_editModel.CategoryId);
+            Guid? documentTypeId = string.IsNullOrWhiteSpace(_editModel.DocumentTypeId) ? null : Guid.Parse(_editModel.DocumentTypeId);
+
+            await DocumentService.UpdateAsync(Id, _editModel.Title, categoryId, documentTypeId);
+
+            await LoadDocumentAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private async Task AddRevisionAsync()
+    {
+        _errorMessage = null;
+
+        try
+        {
+            await DocumentRevisionService.AddRevisionAsync(Id, _newRevision.RevisionIdentifier);
+
+            _newRevision = new NewRevisionModel();
+            await LoadDocumentAsync();
+        }
+        catch (ArgumentException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMessage = ex.Message;
+        }
+    }
+
+    private sealed class EditDocumentModel
+    {
+        public string Title { get; set; } = string.Empty;
+        public string CategoryId { get; set; } = string.Empty;
+        public string DocumentTypeId { get; set; } = string.Empty;
+    }
+
+    private sealed class NewRevisionModel
+    {
+        public string RevisionIdentifier { get; set; } = string.Empty;
+    }
+}

@@ -60,4 +60,41 @@ public sealed class Document
         CategoryId = categoryId;
         DocumentTypeId = documentTypeId;
     }
+
+    /// <summary>
+    /// Associa uma DocumentRevision a este Document. Reforça a mesma invariante de vínculo
+    /// aplicada em <see cref="OfficialFile"/>: a revisão deve pertencer a este Document.
+    /// </summary>
+    public void AddRevision(DocumentRevision revision)
+    {
+        ArgumentNullException.ThrowIfNull(revision);
+
+        if (revision.DocumentId != Id)
+        {
+            throw new InvalidOperationException(
+                "DocumentRevision não pode ser adicionada a um Document diferente do seu DocumentId.");
+        }
+
+        Revisions.Add(revision);
+    }
+
+    public void UpdateTitle(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("Document.Title é obrigatório.", nameof(title));
+        }
+
+        Title = title;
+    }
+
+    public void SetCategory(Guid? categoryId)
+    {
+        CategoryId = categoryId;
+    }
+
+    public void SetDocumentType(Guid? documentTypeId)
+    {
+        DocumentTypeId = documentTypeId;
+    }
 }
